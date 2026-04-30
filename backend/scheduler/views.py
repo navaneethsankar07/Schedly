@@ -1,0 +1,67 @@
+from rest_framework import generics, viewsets, status
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from django.conf import settings
+from django.contrib.auth.models import User
+from .models import Post
+from .serializers import RegisterSerializer, PostSerializer
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
+
+class PostViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return Post.objects.filter(user=self.request.user).order_by('scheduled_time')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['patch'], url_path='mark-posted')
+    def mark_posted(self, request, pk=None):
+        post = self.get_object()
+        post.status = 'posted'
+        post.save()
+        return Response({'status': 'marked as posted'})
+
+class GoogleLoginView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        token = request.data.get('token')
+        if not token:
+            return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            client_id = getattr(settings, 'GOOGLE_OAUTH_CLIENT_ID', 'placeholder')
+            idinfo = id_token.verify_oauth2_token(
+                token, google_requests.Request(), 
+                # Bypass client ID validation if placeholder
+                audience=client_id if client_id != 'placeholder' else None
+            )
+            
+            email = idinfo['email']
+            user, created = User.objects.get_or_create(email=email, defaults={
+                'username': email,
+            })
+            if created:
+                user.set_unusable_password()
+                user.save()
+                
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            })
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
