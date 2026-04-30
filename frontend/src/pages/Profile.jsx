@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Edit2, Link as LinkIcon, Check, Plus, Trash2 } from 'lucide-react';
+import { User, Activity, Edit2, Link as LinkIcon, Check, Plus, Trash2, Twitter, Linkedin, Instagram, Facebook } from 'lucide-react';
 import api from '../services/api';
 
 const AVAILABLE_PLATFORMS = ['Twitter', 'LinkedIn', 'Instagram', 'Facebook'];
+
+const PLATFORM_ICONS = {
+    Twitter: <Twitter className="w-5 h-5" />,
+    LinkedIn: <Linkedin className="w-5 h-5" />,
+    Instagram: <Instagram className="w-5 h-5" />,
+    Facebook: <Facebook className="w-5 h-5" />
+};
 
 const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [stats, setStats] = useState({ total: 0, posted: 0, scheduled: 0 });
     const [isEditingName, setIsEditingName] = useState(false);
     const [username, setUsername] = useState('');
+
     const [platformToAdd, setPlatformToAdd] = useState('');
+    const [platformUrl, setPlatformUrl] = useState('');
+    const [urlError, setUrlError] = useState('');
 
     useEffect(() => {
         fetchProfile();
@@ -48,25 +58,54 @@ const Profile = () => {
         }
     };
 
-    const handleConnectPlatform = async () => {
-        if (!platformToAdd) return;
-        try {
-            const currentPlatforms = profile?.profile?.connected_platforms || [];
-            if (currentPlatforms.includes(platformToAdd)) return;
+    const validateUrl = (platform, url) => {
+        const lowerUrl = url.toLowerCase();
+        if (!lowerUrl.startsWith('http')) return "URL must start with http:// or https://";
 
-            const newPlatforms = [...currentPlatforms, platformToAdd];
+        if (platform === 'Twitter' && !lowerUrl.includes('twitter.com') && !lowerUrl.includes('x.com')) return "Invalid Twitter/X link.";
+        if (platform === 'LinkedIn' && !lowerUrl.includes('linkedin.com')) return "Invalid LinkedIn link.";
+        if (platform === 'Instagram' && !lowerUrl.includes('instagram.com')) return "Invalid Instagram link.";
+        if (platform === 'Facebook' && !lowerUrl.includes('facebook.com')) return "Invalid Facebook link.";
+
+        return "";
+    };
+
+    const handleConnectPlatform = async () => {
+        if (!platformToAdd || !platformUrl) return;
+
+        const errorMsg = validateUrl(platformToAdd, platformUrl);
+        if (errorMsg) {
+            setUrlError(errorMsg);
+            return;
+        }
+        setUrlError('');
+
+        try {
+            // In python/JSON it sits as an array. Might be mixed from older versions (strings vs objects).
+            let currentPlatforms = profile?.profile?.connected_platforms || [];
+
+            // Upgrade migrating old purely-string data
+            currentPlatforms = currentPlatforms.map(p => typeof p === 'string' ? { name: p, url: '' } : p);
+
+            if (currentPlatforms.find(p => p.name === platformToAdd)) return;
+
+            const newPlatforms = [...currentPlatforms, { name: platformToAdd, url: platformUrl }];
             await api.put('user/profile/', { connected_platforms: newPlatforms });
+
             setPlatformToAdd('');
+            setPlatformUrl('');
             fetchProfile();
         } catch (err) {
             console.error(err);
         }
     };
 
-    const handleDisconnectPlatform = async (plat) => {
+    const handleDisconnectPlatform = async (platName) => {
         try {
-            const currentPlatforms = profile?.profile?.connected_platforms || [];
-            const newPlatforms = currentPlatforms.filter(p => p !== plat);
+            let currentPlatforms = profile?.profile?.connected_platforms || [];
+            currentPlatforms = currentPlatforms.map(p => typeof p === 'string' ? { name: p, url: '' } : p);
+
+            const newPlatforms = currentPlatforms.filter(p => p.name !== platName);
             await api.put('user/profile/', { connected_platforms: newPlatforms });
             fetchProfile();
         } catch (err) {
@@ -76,7 +115,9 @@ const Profile = () => {
 
     if (!profile) return <div className="p-8 text-center text-base-content/50">Loading profile...</div>;
 
-    const connectedPlatforms = profile.profile?.connected_platforms || [];
+    let connectedPlatforms = profile.profile?.connected_platforms || [];
+    connectedPlatforms = connectedPlatforms.map(p => typeof p === 'string' ? { name: p, url: 'N/A' } : p);
+    const connectedNames = connectedPlatforms.map(p => p.name);
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
@@ -130,39 +171,60 @@ const Profile = () => {
                     Social Integrations
                 </h2>
 
-                <div className="flex items-center gap-4 mb-8 p-4 bg-base-200 rounded-xl">
-                    <select
-                        value={platformToAdd}
-                        onChange={e => setPlatformToAdd(e.target.value)}
-                        className="select select-bordered flex-1"
-                    >
-                        <option value="">Select platform to connect...</option>
-                        {AVAILABLE_PLATFORMS.filter(p => !connectedPlatforms.includes(p)).map(p => (
-                            <option key={p} value={p}>{p}</option>
-                        ))}
-                    </select>
-                    <button onClick={handleConnectPlatform} disabled={!platformToAdd} className="btn btn-primary">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Connect
-                    </button>
+                <div className="mb-8 p-4 bg-base-200 rounded-xl space-y-3 relative">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <select
+                            value={platformToAdd}
+                            onChange={e => setPlatformToAdd(e.target.value)}
+                            className="select select-bordered w-full sm:w-1/3"
+                        >
+                            <option value="">Select platform...</option>
+                            {AVAILABLE_PLATFORMS.filter(p => !connectedNames.includes(p)).map(p => (
+                                <option key={p} value={p}>{p}</option>
+                            ))}
+                        </select>
+                        <input
+                            type="text"
+                            placeholder={`e.g. https://${platformToAdd ? platformToAdd.toLowerCase() : 'example'}.com/yourprofile`}
+                            value={platformUrl}
+                            onChange={e => {
+                                setPlatformUrl(e.target.value);
+                                setUrlError('');
+                            }}
+                            className="input input-bordered flex-1 w-full"
+                            disabled={!platformToAdd}
+                        />
+                        <button onClick={handleConnectPlatform} disabled={!platformToAdd || !platformUrl} className="btn btn-primary w-full sm:w-auto">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Connect
+                        </button>
+                    </div>
+                    {urlError && <p className="text-sm font-medium text-error absolute -bottom-6 left-2">{urlError}</p>}
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 mt-8">
                     {connectedPlatforms.length === 0 ? (
                         <div className="text-center p-8 bg-base-200/50 rounded-xl border border-dashed border-base-300 text-base-content/50">
                             No social accounts connected yet.
                         </div>
                     ) : (
                         connectedPlatforms.map(plat => (
-                            <div key={plat} className="flex items-center justify-between p-4 border border-base-200 rounded-xl hover:border-primary/30 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                        {plat.charAt(0)}
+                            <div key={plat.name} className="flex items-center justify-between p-4 border border-base-200 rounded-xl hover:border-primary/30 transition-colors">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                        {PLATFORM_ICONS[plat.name] || <LinkIcon className="w-5 h-5" />}
                                     </div>
-                                    <span className="font-semibold text-base-content">{plat}</span>
-                                    <span className="badge badge-success badge-sm">Connected</span>
+                                    <div>
+                                        <span className="font-semibold text-base-content flex items-center gap-2">
+                                            {plat.name}
+                                            <span className="badge badge-success badge-sm">Connected</span>
+                                        </span>
+                                        <a href={plat.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline block max-w-[200px] sm:max-w-xs truncate">
+                                            {plat.url}
+                                        </a>
+                                    </div>
                                 </div>
-                                <button onClick={() => handleDisconnectPlatform(plat)} className="btn btn-ghost btn-sm text-error/70 hover:bg-error/10 hover:text-error">
+                                <button onClick={() => handleDisconnectPlatform(plat.name)} className="btn btn-ghost btn-sm text-error/70 hover:bg-error/10 hover:text-error">
                                     <Trash2 className="w-4 h-4" />
                                 </button>
                             </div>

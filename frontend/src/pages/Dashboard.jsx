@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import PostForm from '../components/PostForm';
-import { Pencil, Trash2, CheckCircle, Plus } from 'lucide-react';
+import { Pencil, Trash2, CheckCircle, Plus, Twitter, Linkedin, Instagram, Facebook, Globe } from 'lucide-react';
 import { format } from 'date-fns';
+
+const PLATFORM_ICONS = {
+    Twitter: <Twitter className="w-3.5 h-3.5 mr-1" />,
+    LinkedIn: <Linkedin className="w-3.5 h-3.5 mr-1" />,
+    Instagram: <Instagram className="w-3.5 h-3.5 mr-1" />,
+    Facebook: <Facebook className="w-3.5 h-3.5 mr-1" />,
+    General: <Globe className="w-3.5 h-3.5 mr-1" />
+};
 
 const Dashboard = () => {
     const [posts, setPosts] = useState([]);
@@ -78,7 +86,8 @@ const Dashboard = () => {
                                         {post.status.toUpperCase()}
                                     </span>
                                     {post.platform && post.platform !== 'General' && (
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 shadow-sm border border-blue-200">
+                                            {PLATFORM_ICONS[post.platform] || PLATFORM_ICONS['General']}
                                             {post.platform}
                                         </span>
                                     )}

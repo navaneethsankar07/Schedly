@@ -90,8 +90,9 @@ const IdeaChatbot = () => {
 
                 let platformText = "";
                 if (socials.length > 0) {
-                    const plat = socials[Math.floor(Math.random() * socials.length)];
-                    platformText = ` This would be perfect for your connected ${plat} account!`;
+                    const platProps = socials[Math.floor(Math.random() * socials.length)];
+                    const platName = typeof platProps === 'string' ? platProps : platProps.name;
+                    platformText = ` This would be perfect for your connected ${platName} account!`;
                 }
 
                 botReply = `Here's an idea for ${matchedTheme}:\n\n✨ ${randomIdea}${platformText}`;
