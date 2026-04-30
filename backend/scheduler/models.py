@@ -22,7 +22,7 @@ class Post(models.Model):
     )
     PLATFORM_CHOICES = (
         ('General', 'General'),
-        ('Twitter', 'Twitter'),
+        ('X', 'X'),
         ('LinkedIn', 'LinkedIn'),
         ('Instagram', 'Instagram'),
         ('Facebook', 'Facebook'),
@@ -33,6 +33,8 @@ class Post(models.Model):
     image = models.ImageField(upload_to='posts/', null=True, blank=True)
     scheduled_time = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
+    notified_24h = models.BooleanField(default=False)
+    notified_due = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

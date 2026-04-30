@@ -55,7 +55,7 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit }) => {
                             className="block w-full rounded-md border-base-content/20 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-3 border"
                         >
                             <option value="General">General</option>
-                            <option value="Twitter">Twitter</option>
+                            <option value="X">X</option>
                             <option value="LinkedIn">LinkedIn</option>
                             <option value="Instagram">Instagram</option>
                             <option value="Facebook">Facebook</option>

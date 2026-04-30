@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Edit2, Link as LinkIcon, Check, Plus, Trash2, Twitter, Linkedin, Instagram, Facebook } from 'lucide-react';
+import { User, Activity, Edit2, Link as LinkIcon, Check, Plus, Trash2 } from 'lucide-react';
+import { FaXTwitter, FaLinkedin, FaInstagram, FaFacebook } from 'react-icons/fa6';
 import api from '../services/api';
 
-const AVAILABLE_PLATFORMS = ['Twitter', 'LinkedIn', 'Instagram', 'Facebook'];
+const AVAILABLE_PLATFORMS = ['X', 'LinkedIn', 'Instagram', 'Facebook'];
 
 const PLATFORM_ICONS = {
-    Twitter: <Twitter className="w-5 h-5" />,
-    LinkedIn: <Linkedin className="w-5 h-5" />,
-    Instagram: <Instagram className="w-5 h-5" />,
-    Facebook: <Facebook className="w-5 h-5" />
+    X: <FaXTwitter className="w-5 h-5 text-neutral-900 dark:text-white" />,
+    LinkedIn: <FaLinkedin className="w-5 h-5 text-[#0A66C2]" />,
+    Instagram: <FaInstagram className="w-5 h-5 text-[#E1306C]" />,
+    Facebook: <FaFacebook className="w-5 h-5 text-[#1877F2]" />
 };
 
 const Profile = () => {
@@ -62,7 +63,7 @@ const Profile = () => {
         const lowerUrl = url.toLowerCase();
         if (!lowerUrl.startsWith('http')) return "URL must start with http:// or https://";
 
-        if (platform === 'Twitter' && !lowerUrl.includes('twitter.com') && !lowerUrl.includes('x.com')) return "Invalid Twitter/X link.";
+        if (platform === 'X' && !lowerUrl.includes('twitter.com') && !lowerUrl.includes('x.com')) return "Invalid X/Twitter link.";
         if (platform === 'LinkedIn' && !lowerUrl.includes('linkedin.com')) return "Invalid LinkedIn link.";
         if (platform === 'Instagram' && !lowerUrl.includes('instagram.com')) return "Invalid Instagram link.";
         if (platform === 'Facebook' && !lowerUrl.includes('facebook.com')) return "Invalid Facebook link.";

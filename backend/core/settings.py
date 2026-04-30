@@ -100,4 +100,11 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
-GOOGLE_OAUTH_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'
+from dotenv import load_dotenv
+
+env_path = BASE_DIR / '.env'
+if env_path.exists():
+    load_dotenv(env_path)
+
+GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID', 'placeholder')
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

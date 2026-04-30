@@ -7,7 +7,9 @@ const PRESET_THEMES = [
     "Technology",
     "Fitness",
     "Business & Marketing",
-    "Lifestyle & Travel"
+    "Lifestyle & Travel",
+    "Comedy & Entertainment",
+    "Education"
 ];
 
 const SUGGESTIONS = {
@@ -30,6 +32,16 @@ const SUGGESTIONS = {
         "Share a 'day in the life' photo dump or short video. ☕",
         "Post your top 3 travel essentials you never leave without. ✈️",
         "Share a hidden gem coffee shop or spot in your city. 🌆"
+    ],
+    "Comedy & Entertainment": [
+        "Share a funny relatable meme about your industry. 😂",
+        "Post a 'Behind the Scenes' blooper reel or funny mistake. 🎬",
+        "Write a humorous take on a common myth in your niche. 🤡"
+    ],
+    "Education": [
+        "Break down a complex topic into 3 simple bullet points. 📚",
+        "Share a 'How-To' mini-guide or infographic. 🎓",
+        "Recommend 3 books or podcasts that changed your perspective. 📖"
     ]
 };
 
@@ -80,6 +92,10 @@ const IdeaChatbot = () => {
                 matchedTheme = "Business & Marketing";
             } else if (lowerInput.includes('life') || lowerInput.includes('travel') || lowerInput.includes('food')) {
                 matchedTheme = "Lifestyle & Travel";
+            } else if (lowerInput.includes('comedy') || lowerInput.includes('fun') || lowerInput.includes('meme') || lowerInput.includes('joke')) {
+                matchedTheme = "Comedy & Entertainment";
+            } else if (lowerInput.includes('edu') || lowerInput.includes('learn') || lowerInput.includes('study') || lowerInput.includes('book')) {
+                matchedTheme = "Education";
             }
 
             let botReply = "";
