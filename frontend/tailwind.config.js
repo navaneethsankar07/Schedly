@@ -9,6 +9,6 @@ export default {
   },
   plugins: [require("daisyui")],
   daisyui: {
-    themes: ["light", "dark", "cupcake", "synthwave", "dracula", "luxury", "nord"],
+    themes: ["light", "dark", "cupcake", "synthwave", "dracula", "luxury"],
   },
 }

@@ -59,7 +59,6 @@ const Navbar = () => {
                                 <li><button data-set-theme="synthwave" className="btn btn-sm btn-block btn-ghost justify-start">Synthwave</button></li>
                                 <li><button data-set-theme="dracula" className="btn btn-sm btn-block btn-ghost justify-start">Dracula</button></li>
                                 <li><button data-set-theme="luxury" className="btn btn-sm btn-block btn-ghost justify-start">Luxury</button></li>
-                                <li><button data-set-theme="nord" className="btn btn-sm btn-block btn-ghost justify-start">Nord</button></li>
                             </ul>
                         </div>
 

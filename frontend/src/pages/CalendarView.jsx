@@ -65,7 +65,7 @@ const CalendarView = () => {
                             <div
                                 key={day.toString()}
                                 onClick={() => setSelectedDate(day)}
-                                className={`min-h-[100px] bg-base-100 p-2 cursor-pointer hover:bg-indigo-50 transition ${isSelected ? 'ring-2 ring-indigo-500 ring-inset bg-indigo-50' : ''
+                                className={`min-h-[100px] bg-base-100 p-2 cursor-pointer hover:bg-emerald-50 transition ${isSelected ? 'ring-2 ring-emerald-500 ring-inset bg-emerald-50' : ''
                                     }`}
                             >
                                 <div className="font-medium text-sm text-base-content/80 mb-1">{format(day, 'd')}</div>

@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import CalendarView from './pages/CalendarView';
 import LandingPage from './pages/LandingPage';
 import Navbar from './components/Navbar';
+import IdeaChatbot from './components/IdeaChatbot';
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useContext(AuthContext);
@@ -23,6 +24,7 @@ const AppLayout = ({ children }) => {
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {children}
       </main>
+      <IdeaChatbot />
     </div>
   );
 };

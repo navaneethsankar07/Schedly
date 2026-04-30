@@ -47,7 +47,7 @@ const Dashboard = () => {
                 <h1 className="text-2xl font-bold text-base-content">Dashboard</h1>
                 <button
                     onClick={() => { setPostToEdit(null); setIsFormOpen(true); }}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 transition"
                 >
                     <Plus className="w-4 h-4 mr-2" />
                     Create Post
@@ -59,7 +59,7 @@ const Dashboard = () => {
                     <button
                         key={f}
                         onClick={() => setFilter(f)}
-                        className={`px-4 py-2 rounded-md text-sm font-medium capitalize transition ${filter === f ? 'bg-indigo-100 text-indigo-700' : 'text-base-content/60 hover:text-base-content/80 hover:bg-base-300'
+                        className={`px-4 py-2 rounded-md text-sm font-medium capitalize transition ${filter === f ? 'bg-emerald-100 text-emerald-700' : 'text-base-content/60 hover:text-base-content/80 hover:bg-base-300'
                             }`}
                     >
                         {f}
@@ -77,7 +77,7 @@ const Dashboard = () => {
                                     {post.status.toUpperCase()}
                                 </span>
                                 <div className="flex space-x-2">
-                                    <button onClick={() => { setPostToEdit(post); setIsFormOpen(true); }} className="text-base-content/40 hover:text-indigo-600 transition">
+                                    <button onClick={() => { setPostToEdit(post); setIsFormOpen(true); }} className="text-base-content/40 hover:text-emerald-600 transition">
                                         <Pencil className="w-4 h-4" />
                                     </button>
                                     <button onClick={() => handleDelete(post.id)} className="text-base-content/40 hover:text-red-600 transition">
@@ -94,7 +94,7 @@ const Dashboard = () => {
                             <div className="bg-base-200 px-5 py-3 border-t border-base-200">
                                 <button
                                     onClick={() => markPosted(post.id)}
-                                    className="w-full inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition"
+                                    className="w-full inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-emerald-700 bg-emerald-100 hover:bg-emerald-200 transition"
                                 >
                                     <CheckCircle className="w-4 h-4 mr-1.5" />
                                     Mark as Posted
