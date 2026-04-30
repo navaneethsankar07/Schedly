@@ -41,10 +41,6 @@ class PostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Scheduled time must be in the future.")
         return value
 
-    def create(self, validated_data):
-        user = self.context['request'].user
-        return Post.objects.create(user=user, **validated_data)
-
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
