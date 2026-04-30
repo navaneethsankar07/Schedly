@@ -5,7 +5,15 @@ import { X } from 'lucide-react';
 const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit }) => {
     const [content, setContent] = useState(postToEdit ? postToEdit.content : '');
     const [platform, setPlatform] = useState(postToEdit ? postToEdit.platform : 'General');
-    const [scheduledTime, setScheduledTime] = useState(postToEdit ? postToEdit.scheduled_time.slice(0, 16) : '');
+    // Prefill edit form: convert stored UTC ISO string → local datetime-local string
+    const toLocalInputValue = (utcStr) => {
+        if (!utcStr) return '';
+        const d = new Date(utcStr);
+        // datetime-local format: YYYY-MM-DDTHH:mm
+        const pad = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+    const [scheduledTime, setScheduledTime] = useState(postToEdit ? toLocalInputValue(postToEdit.scheduled_time) : '');
     const [error, setError] = useState(null);
 
     if (!isOpen) return null;
@@ -13,7 +21,9 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const payload = { content, platform, scheduled_time: scheduledTime };
+            // Convert the local datetime-local value to a UTC ISO string for Django
+            const utcIso = new Date(scheduledTime).toISOString();
+            const payload = { content, platform, scheduled_time: utcIso };
             if (postToEdit) {
                 await api.put(`posts/${postToEdit.id}/`, payload);
             } else {
