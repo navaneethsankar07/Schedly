@@ -18,7 +18,7 @@ const ProtectedRoute = ({ children }) => {
 
 const AppLayout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-base-200 text-base-content flex flex-col transition-colors duration-300">
       <Navbar />
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {children}

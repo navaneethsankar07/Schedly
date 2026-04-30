@@ -32,28 +32,28 @@ const CalendarView = () => {
 
     return (
         <div className="flex flex-col lg:flex-row gap-8">
-            <div className="flex-1 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex-1 bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-gray-900">{format(currentDate, 'MMMM yyyy')}</h2>
+                    <h2 className="text-xl font-bold text-base-content">{format(currentDate, 'MMMM yyyy')}</h2>
                     <div className="space-x-2">
                         <button
                             onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}
-                            className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 transition"
+                            className="px-3 py-1 border border-base-content/20 rounded hover:bg-base-200 transition"
                         >
                             Prev
                         </button>
                         <button
                             onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))}
-                            className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 transition"
+                            className="px-3 py-1 border border-base-content/20 rounded hover:bg-base-200 transition"
                         >
                             Next
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden border border-gray-200">
+                <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden border border-base-300">
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                        <div key={day} className="bg-gray-50 text-center text-xs font-semibold text-gray-500 py-3 uppercase tracking-wider">
+                        <div key={day} className="bg-base-200 text-center text-xs font-semibold text-base-content/60 py-3 uppercase tracking-wider">
                             {day}
                         </div>
                     ))}
@@ -65,10 +65,10 @@ const CalendarView = () => {
                             <div
                                 key={day.toString()}
                                 onClick={() => setSelectedDate(day)}
-                                className={`min-h-[100px] bg-white p-2 cursor-pointer hover:bg-indigo-50 transition ${isSelected ? 'ring-2 ring-indigo-500 ring-inset bg-indigo-50' : ''
+                                className={`min-h-[100px] bg-base-100 p-2 cursor-pointer hover:bg-indigo-50 transition ${isSelected ? 'ring-2 ring-indigo-500 ring-inset bg-indigo-50' : ''
                                     }`}
                             >
-                                <div className="font-medium text-sm text-gray-700 mb-1">{format(day, 'd')}</div>
+                                <div className="font-medium text-sm text-base-content/80 mb-1">{format(day, 'd')}</div>
                                 <div className="space-y-1">
                                     {dayPosts.map(post => (
                                         <div
@@ -87,22 +87,22 @@ const CalendarView = () => {
             </div>
 
             <div className="w-full lg:w-96">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">
+                <div className="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
+                    <h3 className="text-lg font-bold text-base-content mb-4">
                         {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
                     </h3>
                     {selectedDate && selectedPosts.length === 0 && (
-                        <p className="text-gray-500 text-sm">No posts scheduled for this day.</p>
+                        <p className="text-base-content/60 text-sm">No posts scheduled for this day.</p>
                     )}
                     <div className="space-y-4">
                         {selectedPosts.map(post => (
-                            <div key={post.id} className="p-4 border border-gray-100 bg-gray-50 rounded-lg">
+                            <div key={post.id} className="p-4 border border-base-200 bg-base-200 rounded-lg">
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mb-2 ${post.status === 'posted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                     }`}>
                                     {post.status.toUpperCase()}
                                 </span>
-                                <p className="text-sm text-gray-900 line-clamp-3 mb-2">{post.content}</p>
-                                <div className="text-xs text-gray-500">
+                                <p className="text-sm text-base-content line-clamp-3 mb-2">{post.content}</p>
+                                <div className="text-xs text-base-content/60">
                                     {format(new Date(post.scheduled_time), 'h:mm a')}
                                 </div>
                             </div>
