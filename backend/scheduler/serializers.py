@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Post, Profile
+from .models import Post, Profile, Notification
 from django.utils import timezone
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -40,3 +40,13 @@ class PostSerializer(serializers.ModelSerializer):
         if value < timezone.now():
             raise serializers.ValidationError("Scheduled time must be in the future.")
         return value
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        return Post.objects.create(user=user, **validated_data)
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'user', 'message', 'is_read', 'created_at']
+        read_only_fields = ['id', 'user', 'created_at']

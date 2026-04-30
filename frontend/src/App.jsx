@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import CalendarView from './pages/CalendarView';
 import LandingPage from './pages/LandingPage';
 import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
 import Navbar from './components/Navbar';
 import IdeaChatbot from './components/IdeaChatbot';
 
@@ -41,6 +42,7 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
       <Route path="/calendar" element={<ProtectedRoute><AppLayout><CalendarView /></AppLayout></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><AppLayout><Profile /></AppLayout></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><AppLayout><Notifications /></AppLayout></ProtectedRoute>} />
     </Routes>
   );
 };

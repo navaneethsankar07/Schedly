@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Calendar, LayoutDashboard, LogOut, Palette, User } from 'lucide-react';
 import { themeChange } from 'theme-change';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
     const { logout } = useContext(AuthContext);
@@ -61,6 +62,8 @@ const Navbar = () => {
                                 <li><button data-set-theme="luxury" className="btn btn-sm btn-block btn-ghost justify-start">Luxury</button></li>
                             </ul>
                         </div>
+
+                        <NotificationBell />
 
                         <Link
                             to="/profile"

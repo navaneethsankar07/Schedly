@@ -5,7 +5,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 def check_notifications():
-    from .models import Post
+    from .models import Post, Notification
     
     # Ensure it only runs once per cycle
     # Wait, we configure this to run every minute
@@ -27,6 +27,10 @@ def check_notifications():
         email = post.user.email
         if email:
             try:
+                Notification.objects.create(
+                    user=post.user,
+                    message=f"Upcoming Post Reminder: 1 Day Left for your post '{post.content[:30]}...'"
+                )
                 send_mail(
                     subject='Upcoming Post Reminder: 1 Day Left',
                     message=f'Hello! This is a reminder that your scheduled post is due tomorrow at {post.scheduled_time.strftime("%I:%M %p")}.\n\nPreview: "{post.content[:50]}..."',
@@ -55,6 +59,10 @@ def check_notifications():
         email = post.user.email
         if email:
             try:
+                Notification.objects.create(
+                    user=post.user,
+                    message=f"Action Required: It is time to post your scheduled content '{post.content[:30]}...'"
+                )
                 send_mail(
                     subject='Action Required: Post Time Reached',
                     message=f'Hello! It is time to post your scheduled content.\n\nContent: "{post.content}"\n\nLogin to the dashboard to mark it as published.',

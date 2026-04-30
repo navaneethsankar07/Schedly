@@ -9,8 +9,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
 from django.contrib.auth.models import User
-from .models import Post
-from .serializers import RegisterSerializer, PostSerializer, UserSerializer
+from .models import Post, Profile, Notification
+from .serializers import RegisterSerializer, PostSerializer, UserSerializer, NotificationSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -67,10 +67,11 @@ class GoogleLoginView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserProfileView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = UserSerializer(request.user)
+        user = request.user
+        serializer = UserSerializer(user)
         return Response(serializer.data)
 
     def put(self, request):
@@ -88,3 +89,22 @@ class UserProfileView(APIView):
             profile.save()
 
         return Response(UserSerializer(user).data)
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.request.user.notifications.all().order_by('-created_at')
+
+    @action(detail=True, methods=['patch'], url_path='mark-read')
+    def mark_read(self, request, pk=None):
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save(update_fields=['is_read'])
+        return Response({'status': 'marked as read'})
+
+    @action(detail=False, methods=['post'], url_path='mark-all-read')
+    def mark_all_read(self, request):
+        self.get_queryset().update(is_read=True)
+        return Response({'status': 'all marked as read'})
