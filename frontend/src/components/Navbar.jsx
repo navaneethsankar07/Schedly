@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Calendar, LayoutDashboard, LogOut, Palette } from 'lucide-react';
+import { Calendar, LayoutDashboard, LogOut, Palette, User } from 'lucide-react';
 import { themeChange } from 'theme-change';
 
 const Navbar = () => {
@@ -26,8 +26,8 @@ const Navbar = () => {
                             <Link
                                 to="/dashboard"
                                 className={`${isActive('/dashboard')
-                                        ? 'border-primary text-base-content'
-                                        : 'border-transparent text-base-content/60 hover:border-base-300 hover:text-base-content'
+                                    ? 'border-primary text-base-content'
+                                    : 'border-transparent text-base-content/60 hover:border-base-300 hover:text-base-content'
                                     } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                             >
                                 <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -36,8 +36,8 @@ const Navbar = () => {
                             <Link
                                 to="/calendar"
                                 className={`${isActive('/calendar')
-                                        ? 'border-primary text-base-content'
-                                        : 'border-transparent text-base-content/60 hover:border-base-300 hover:text-base-content'
+                                    ? 'border-primary text-base-content'
+                                    : 'border-transparent text-base-content/60 hover:border-base-300 hover:text-base-content'
                                     } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                             >
                                 <Calendar className="w-4 h-4 mr-2" />
@@ -61,6 +61,14 @@ const Navbar = () => {
                                 <li><button data-set-theme="luxury" className="btn btn-sm btn-block btn-ghost justify-start">Luxury</button></li>
                             </ul>
                         </div>
+
+                        <Link
+                            to="/profile"
+                            className="btn btn-ghost btn-circle"
+                            title="Profile"
+                        >
+                            <User className="w-5 h-5 opacity-70" />
+                        </Link>
 
                         <button
                             onClick={logout}

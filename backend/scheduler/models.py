@@ -1,13 +1,35 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    connected_platforms = models.JSONField(default=list, blank=True)
+
+    def __str__(self):
+        return self.user.username
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
 
 class Post(models.Model):
     STATUS_CHOICES = (
         ('scheduled', 'Scheduled'),
         ('posted', 'Posted'),
     )
+    PLATFORM_CHOICES = (
+        ('General', 'General'),
+        ('Twitter', 'Twitter'),
+        ('LinkedIn', 'LinkedIn'),
+        ('Instagram', 'Instagram'),
+        ('Facebook', 'Facebook'),
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField()
+    platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES, default='General')
     image = models.ImageField(upload_to='posts/', null=True, blank=True)
     scheduled_time = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')

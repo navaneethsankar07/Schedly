@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 
 const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit }) => {
     const [content, setContent] = useState(postToEdit ? postToEdit.content : '');
+    const [platform, setPlatform] = useState(postToEdit ? postToEdit.platform : 'General');
     const [scheduledTime, setScheduledTime] = useState(postToEdit ? postToEdit.scheduled_time.slice(0, 16) : '');
     const [error, setError] = useState(null);
 
@@ -12,7 +13,7 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const payload = { content, scheduled_time: scheduledTime };
+            const payload = { content, platform, scheduled_time: scheduledTime };
             if (postToEdit) {
                 await api.put(`posts/${postToEdit.id}/`, payload);
             } else {
@@ -45,6 +46,20 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit }) => {
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                         />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-base-content/80 mb-1">Platform</label>
+                        <select
+                            value={platform}
+                            onChange={(e) => setPlatform(e.target.value)}
+                            className="block w-full rounded-md border-base-content/20 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-3 border"
+                        >
+                            <option value="General">General</option>
+                            <option value="Twitter">Twitter</option>
+                            <option value="LinkedIn">LinkedIn</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="Facebook">Facebook</option>
+                        </select>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-base-content/80">Scheduled Time</label>

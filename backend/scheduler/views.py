@@ -10,7 +10,7 @@ from google.auth.transport import requests as google_requests
 from django.conf import settings
 from django.contrib.auth.models import User
 from .models import Post
-from .serializers import RegisterSerializer, PostSerializer
+from .serializers import RegisterSerializer, PostSerializer, UserSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -65,3 +65,26 @@ class GoogleLoginView(APIView):
             })
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserProfileView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        user = request.user
+        username = request.data.get('username')
+        connected_platforms = request.data.get('connected_platforms')
+
+        if username:
+            user.username = username
+            user.save()
+            
+        if connected_platforms is not None:
+            profile = user.profile
+            profile.connected_platforms = connected_platforms
+            profile.save()
+
+        return Response(UserSerializer(user).data)

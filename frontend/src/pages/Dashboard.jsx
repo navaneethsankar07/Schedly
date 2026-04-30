@@ -72,10 +72,17 @@ const Dashboard = () => {
                     <div key={post.id} className="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden hover:shadow-md transition">
                         <div className="p-5">
                             <div className="flex justify-between items-start">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.status === 'posted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                                    }`}>
-                                    {post.status.toUpperCase()}
-                                </span>
+                                <div className="flex space-x-2">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.status === 'posted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                        }`}>
+                                        {post.status.toUpperCase()}
+                                    </span>
+                                    {post.platform && post.platform !== 'General' && (
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {post.platform}
+                                        </span>
+                                    )}
+                                </div>
                                 <div className="flex space-x-2">
                                     <button onClick={() => { setPostToEdit(post); setIsFormOpen(true); }} className="text-base-content/40 hover:text-emerald-600 transition">
                                         <Pencil className="w-4 h-4" />

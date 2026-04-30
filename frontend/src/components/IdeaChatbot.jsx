@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Sparkles, Bot } from 'lucide-react';
+import { Bot, X, Send, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../services/api';
 
 const PRESET_THEMES = [
     "Technology",
@@ -38,7 +39,17 @@ const IdeaChatbot = () => {
         { id: 1, type: 'bot', text: "Hey! Need content ideas? Tell me what your niche is, or select a theme below." }
     ]);
     const [inputText, setInputText] = useState("");
+    const [socials, setSocials] = useState([]);
     const messagesEndRef = useRef(null);
+
+    useEffect(() => {
+        // Fetch socials if dashboard allows it, ensuring context-aware chatbot
+        api.get('user/profile/').then(res => {
+            if (res.data?.profile?.connected_platforms) {
+                setSocials(res.data.profile.connected_platforms);
+            }
+        }).catch(() => { });
+    }, []);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,19 +63,15 @@ const IdeaChatbot = () => {
         const userText = text.trim();
         if (!userText) return;
 
-        // Add user message
         const newMessages = [...messages, { id: Date.now(), type: 'user', text: userText }];
         setMessages(newMessages);
         if (!isPreset) setInputText("");
 
-        // Simulate bot thinking
         setTimeout(() => {
-            let botReply = "Hmm, I don't have specific ideas for that exact topic. Try selecting one of the prominent themes above or asking about Tech, Fitness, Business, or Lifestyle!";
-
-            // Basic free local logic
             const lowerInput = userText.toLowerCase();
             let matchedTheme = null;
 
+            // Ensure it only answers specific themes
             if (lowerInput.includes('tech') || lowerInput.includes('software') || lowerInput.includes('coding')) {
                 matchedTheme = "Technology";
             } else if (lowerInput.includes('fit') || lowerInput.includes('health') || lowerInput.includes('gym')) {
@@ -75,10 +82,22 @@ const IdeaChatbot = () => {
                 matchedTheme = "Lifestyle & Travel";
             }
 
+            let botReply = "";
+
             if (matchedTheme) {
                 const ideas = SUGGESTIONS[matchedTheme];
                 const randomIdea = ideas[Math.floor(Math.random() * ideas.length)];
-                botReply = `Here's an idea for ${matchedTheme}:\n\n✨ ${randomIdea}`;
+
+                let platformText = "";
+                if (socials.length > 0) {
+                    const plat = socials[Math.floor(Math.random() * socials.length)];
+                    platformText = ` This would be perfect for your connected ${plat} account!`;
+                }
+
+                botReply = `Here's an idea for ${matchedTheme}:\n\n✨ ${randomIdea}${platformText}`;
+            } else {
+                // Strict guard: don't reply to random things
+                botReply = "I am specifically designed to suggest content ideation! Please provide a valid prompt or select one of the suggested themes like Tech, Fitness, Business, or Lifestyle.";
             }
 
             setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: botReply }]);
@@ -93,9 +112,8 @@ const IdeaChatbot = () => {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="fixed bottom-20 right-4 sm:right-8 w-[350px] max-h-[500px] bg-base-100 shadow-2xl rounded-2xl border border-base-300 flex flex-col z-50 overflow-hidden"
+                        className="fixed bottom-20 right-4 sm:right-8 w-[350px] max-h-[500px] bg-base-100 shadow-2xl rounded-2xl border border-base-300 flex flex-col z-[100] overflow-hidden"
                     >
-                        {/* Header */}
                         <div className="bg-primary text-primary-content p-4 flex justify-between items-center">
                             <div className="flex items-center gap-2">
                                 <Bot className="w-6 h-6" />
@@ -106,7 +124,6 @@ const IdeaChatbot = () => {
                             </button>
                         </div>
 
-                        {/* Chat Area */}
                         <div className="flex-1 p-4 overflow-y-auto bg-base-200/50 space-y-4 max-h-[300px]">
                             {messages.map((msg) => (
                                 <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -119,7 +136,6 @@ const IdeaChatbot = () => {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Presets */}
                         <div className="p-3 bg-base-100 border-t border-base-200 flex flex-nowrap overflow-x-auto gap-2 no-scrollbar">
                             {PRESET_THEMES.map(theme => (
                                 <button
@@ -132,7 +148,6 @@ const IdeaChatbot = () => {
                             ))}
                         </div>
 
-                        {/* Input */}
                         <div className="p-3 bg-base-100 border-t border-base-200 flex items-center gap-2">
                             <input
                                 type="text"
@@ -157,7 +172,7 @@ const IdeaChatbot = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 bg-primary hover:brightness-110 text-primary-content p-4 rounded-full shadow-xl shadow-primary/30 z-50 transition"
+                className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 bg-primary hover:brightness-110 text-primary-content p-4 rounded-full shadow-xl shadow-primary/30 z-[100] transition"
             >
                 {isOpen ? <X className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
             </motion.button>
