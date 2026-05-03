@@ -1,30 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import api from '../services/api';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay } from 'date-fns';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const CalendarView = () => {
-    const [posts, setPosts] = useState([]);
+    const queryClient = useQueryClient();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
 
-    const fetchPosts = async () => {
-        try {
+    const { data: posts = [] } = useQuery({
+        queryKey: ['posts'],
+        queryFn: async () => {
             const res = await api.get('posts/');
-            setPosts(res.data);
-        } catch (err) {
-            console.error(err);
+            return res.data;
         }
-    };
-
-    useEffect(() => {
-        fetchPosts();
-    }, []);
+    });
 
     const handleDragStart = (e, post) => {
         e.dataTransfer.setData('post', JSON.stringify(post));
     };
 
-    const handleDrop = async (e, droppedDate) => {
+    const updatePostMutation = useMutation({
+        mutationFn: async ({ id, payload }) => {
+            await api.put(`posts/${id}/`, payload);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['posts'] });
+        }
+    });
+
+    const handleDrop = (e, droppedDate) => {
         e.preventDefault();
         try {
             const postObjStr = e.dataTransfer.getData('post');
@@ -44,8 +49,7 @@ const CalendarView = () => {
                 scheduled_time: newDateObj.toISOString(),
             };
 
-            await api.put(`posts/${post.id}/`, payload);
-            fetchPosts();
+            updatePostMutation.mutate({ id: post.id, payload });
         } catch (err) {
             console.error("Drop failed: ", err);
         }
