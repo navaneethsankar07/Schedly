@@ -22,7 +22,11 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Post.objects.filter(user=self.request.user).order_by('scheduled_time')
+        queryset = Post.objects.filter(user=self.request.user).order_by('scheduled_time')
+        category = self.request.query_params.get('category')
+        if category and category.lower() != 'all':
+            queryset = queryset.filter(platform__iexact=category)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

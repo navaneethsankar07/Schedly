@@ -17,13 +17,14 @@ const Dashboard = () => {
     const [posts, setPosts] = useState([]);
     const [templates, setTemplates] = useState([]);
     const [filter, setFilter] = useState('all');
+    const [platformFilter, setPlatformFilter] = useState('All');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [postToEdit, setPostToEdit] = useState(null);
     const [prefillContent, setPrefillContent] = useState('');
 
     const fetchPosts = async () => {
         try {
-            const res = await api.get('posts/');
+            const res = await api.get(`posts/?category=${platformFilter.toLowerCase()}`);
             setPosts(res.data);
         } catch (err) {
             console.error(err);
@@ -41,6 +42,9 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchPosts();
+    }, [platformFilter]);
+
+    useEffect(() => {
         fetchTemplates();
     }, []);
 
@@ -82,17 +86,34 @@ const Dashboard = () => {
                 </button>
             </div>
 
-            <div className="flex space-x-2 border-b border-base-300 pb-2">
-                {['all', 'upcoming', 'completed'].map(f => (
-                    <button
-                        key={f}
-                        onClick={() => setFilter(f)}
-                        className={`px-4 py-2 rounded-md text-sm font-medium capitalize transition ${filter === f ? 'bg-emerald-100 text-emerald-700' : 'text-base-content/60 hover:text-base-content/80 hover:bg-base-300'
-                            }`}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-base-300 pb-2">
+                <div className="flex space-x-2">
+                    {['all', 'upcoming', 'completed'].map(f => (
+                        <button
+                            key={f}
+                            onClick={() => setFilter(f)}
+                            className={`px-4 py-2 rounded-md text-sm font-medium capitalize transition ${filter === f ? 'bg-emerald-100 text-emerald-700' : 'text-base-content/60 hover:text-base-content/80 hover:bg-base-300'
+                                }`}
+                        >
+                            {f}
+                        </button>
+                    ))}
+                </div>
+                <div className="flex items-center space-x-2">
+                    <span className="text-sm text-base-content/70">Platform:</span>
+                    <select
+                        value={platformFilter}
+                        onChange={(e) => setPlatformFilter(e.target.value)}
+                        className="rounded-md border-base-content/20 bg-base-100 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border text-base-content"
                     >
-                        {f}
-                    </button>
-                ))}
+                        <option value="All">All Categories</option>
+                        <option value="Instagram">Instagram</option>
+                        <option value="LinkedIn">LinkedIn</option>
+                        <option value="X">X</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
             </div>
 
             {templates.length > 0 && (
