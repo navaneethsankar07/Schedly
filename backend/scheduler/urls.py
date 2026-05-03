@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import RegisterView, PostViewSet, GoogleLoginView, UserProfileView, NotificationViewSet, TemplateViewSet, AnalyticsView, ImproveCaptionView
+from .views import RegisterView, PostViewSet, GoogleLoginView, UserProfileView, NotificationViewSet, TemplateViewSet, AnalyticsView, ImproveCaptionView, TimeSuggestionView
 
 router = DefaultRouter()
 router.register(r'posts', PostViewSet, basename='post')
@@ -15,6 +15,7 @@ urlpatterns = [
     path('user/profile/', UserProfileView.as_view(), name='user_profile'),
     path('analytics/', AnalyticsView.as_view(), name='analytics'),
     path('caption/improve/', ImproveCaptionView.as_view(), name='improve_caption'),
+    path('suggestions/time/', TimeSuggestionView.as_view(), name='suggest_time'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('', include(router.urls)),
 ]
