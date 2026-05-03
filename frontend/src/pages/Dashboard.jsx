@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 import PostForm from '../components/PostForm';
-import { Pencil, Trash2, CheckCircle, Plus, Globe, LockKeyhole } from 'lucide-react';
+import { Pencil, Trash2, CheckCircle, Plus, Globe, LockKeyhole, LayoutTemplate, FileText, X as XIcon, BookOpen } from 'lucide-react';
 import { FaXTwitter, FaLinkedin, FaInstagram, FaFacebook } from 'react-icons/fa6';
 import { format } from 'date-fns';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,6 +24,8 @@ const Dashboard = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [postToEdit, setPostToEdit] = useState(null);
     const [prefillContent, setPrefillContent] = useState('');
+    const [showTemplateModal, setShowTemplateModal] = useState(false);
+    const [newTemplate, setNewTemplate] = useState({ title: '', content: '' });
 
     const { data: posts = [] } = useQuery({
         queryKey: ['posts', platformFilter.toLowerCase()],
@@ -56,6 +58,20 @@ const Dashboard = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['posts'] });
             queryClient.invalidateQueries({ queryKey: ['analytics'] });
+        }
+    });
+
+    const deleteTemplateMutation = useMutation({
+        mutationFn: async (id) => { await api.delete(`templates/${id}/`); },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['templates'] })
+    });
+
+    const createTemplateMutation = useMutation({
+        mutationFn: async (payload) => { await api.post('templates/', payload); },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['templates'] });
+            setShowTemplateModal(false);
+            setNewTemplate({ title: '', content: '' });
         }
     });
 
@@ -181,15 +197,57 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {templates.length > 0 && (
-                <div className="mb-6">
-                    <h2 className="text-lg font-bold text-base-content mb-3">Templates</h2>
-                    <div className="flex gap-4 overflow-x-auto pb-2">
+            {/* ── Templates Section ── */}
+            <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-extrabold text-base-content flex items-center gap-2">
+                        <LayoutTemplate className="w-5 h-5 text-primary" />
+                        Templates
+                    </h2>
+                    <button
+                        onClick={() => setShowTemplateModal(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-primary text-primary-content hover:opacity-90 transition-all hover:-translate-y-0.5 shadow-sm"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Create Template
+                    </button>
+                </div>
+
+                {templates.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-14 rounded-3xl border-2 border-dashed border-base-300 bg-base-200 text-center gap-4">
+                        <MascotOrb className="w-20 h-20" expression="think" />
+                        <div>
+                            <p className="font-bold text-base-content text-lg">No templates yet</p>
+                            <p className="text-base-content/60 text-sm mt-1">Save your best captions as reusable templates.</p>
+                        </div>
+                        <button
+                            onClick={() => setShowTemplateModal(true)}
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold bg-primary text-primary-content hover:opacity-90 transition-all hover:-translate-y-0.5 shadow-md"
+                        >
+                            <Plus className="w-4 h-4" /> Create your first template
+                        </button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                         {templates.map(template => (
-                            <div key={template.id} className="min-w-[250px] bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm flex flex-col justify-between">
+                            <div key={template.id} className="post-card bg-base-100 rounded-2xl border border-base-300/60 p-5 flex flex-col justify-between gap-4 group">
                                 <div>
-                                    <h3 className="font-semibold text-base-content">{template.title}</h3>
-                                    <p className="text-sm text-base-content/60 mt-1 line-clamp-2">{template.content}</p>
+                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                                                <FileText className="w-4 h-4" />
+                                            </div>
+                                            <h3 className="font-bold text-base-content text-sm leading-tight line-clamp-1">{template.title}</h3>
+                                        </div>
+                                        <button
+                                            onClick={() => deleteTemplateMutation.mutate(template.id)}
+                                            className="text-base-content/30 hover:text-error transition-colors opacity-0 group-hover:opacity-100"
+                                            title="Delete template"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-base-content/60 line-clamp-3 leading-relaxed">{template.content}</p>
                                 </div>
                                 <button
                                     onClick={() => {
@@ -197,12 +255,62 @@ const Dashboard = () => {
                                         setPrefillContent(template.content);
                                         setIsFormOpen(true);
                                     }}
-                                    className="mt-4 px-3 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-md hover:bg-emerald-200 transition text-center"
+                                    className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary hover:text-primary-content transition-all"
                                 >
+                                    <BookOpen className="w-3.5 h-3.5" />
                                     Use Template
                                 </button>
                             </div>
                         ))}
+                    </div>
+                )}
+            </div>
+
+            {/* ── Create Template Modal ── */}
+            {showTemplateModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowTemplateModal(false)}>
+                    <div className="w-full max-w-md bg-base-100 rounded-3xl shadow-2xl border border-base-300 overflow-hidden" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-base-300">
+                            <h3 className="text-lg font-extrabold text-base-content flex items-center gap-2">
+                                <LayoutTemplate className="w-5 h-5 text-primary" />
+                                New Template
+                            </h3>
+                            <button onClick={() => setShowTemplateModal(false)} className="btn btn-ghost btn-sm btn-circle">
+                                <XIcon className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-base-content mb-1.5">Title</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Monday motivation post"
+                                    value={newTemplate.title}
+                                    onChange={e => setNewTemplate(t => ({ ...t, title: e.target.value }))}
+                                    className="input input-bordered w-full rounded-xl text-base-content"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-base-content mb-1.5">Content</label>
+                                <textarea
+                                    rows={5}
+                                    placeholder="Write your template caption here..."
+                                    value={newTemplate.content}
+                                    onChange={e => setNewTemplate(t => ({ ...t, content: e.target.value }))}
+                                    className="textarea textarea-bordered w-full rounded-xl text-base-content resize-none"
+                                />
+                            </div>
+                        </div>
+                        <div className="px-6 pb-6 flex justify-end gap-3">
+                            <button onClick={() => setShowTemplateModal(false)} className="btn btn-ghost rounded-xl">Cancel</button>
+                            <button
+                                disabled={!newTemplate.title.trim() || !newTemplate.content.trim() || createTemplateMutation.isPending}
+                                onClick={() => createTemplateMutation.mutate(newTemplate)}
+                                className="btn btn-primary rounded-xl"
+                            >
+                                {createTemplateMutation.isPending ? 'Saving...' : 'Save Template'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

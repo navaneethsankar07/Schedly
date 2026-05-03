@@ -94,3 +94,60 @@ main, .space-y-6, .space-y-8 {
 }
 
 /* DaisyUI provides theme variables natively */
+
+/* ── Semantic colour tokens (theme-aware) ── */
+/* These map custom utility classes like bg-c-card / text-c-text to the right value per theme */
+
+[data-theme="light"], :root {
+    --c-bg:      #f3f4f6;
+    --c-card:    #ffffff;
+    --c-border:  #e5e7eb;
+    --c-text:    #111827;
+    --c-muted:   #6b7280;
+    --c-accent:  #4f46e5;
+}
+
+[data-theme="dark"] {
+    --c-bg:      #0f172a;
+    --c-card:    #1e293b;
+    --c-border:  #334155;
+    --c-text:    #f1f5f9;
+    --c-muted:   #94a3b8;
+    --c-accent:  #818cf8;
+}
+
+[data-theme="cupcake"] {
+    --c-bg:      #faf7f5;
+    --c-card:    #ffffff;
+    --c-border:  #e9d8d0;
+    --c-text:    #291334;
+    --c-muted:   #7b6a72;
+    --c-accent:  #65c3c8;
+}
+
+[data-theme="synthwave"] {
+    --c-bg:      #1a103c;
+    --c-card:    #2d1b69;
+    --c-border:  #4c3099;
+    --c-text:    #f9e6ff;
+    --c-muted:   #c4b5e8;
+    --c-accent:  #e779c1;
+}
+
+[data-theme="dracula"] {
+    --c-bg:      #1e1f29;
+    --c-card:    #282a36;
+    --c-border:  #44475a;
+    --c-text:    #f8f8f2;
+    --c-muted:   #6272a4;
+    --c-accent:  #bd93f9;
+}
+
+[data-theme="luxury"] {
+    --c-bg:      #09090b;
+    --c-card:    #151515;
+    --c-border:  #2d2d2d;
+    --c-text:    #e9d8a6;
+    --c-muted:   #a0895c;
+    --c-accent:  #ad9b5f;
+}
