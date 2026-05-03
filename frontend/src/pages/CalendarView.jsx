@@ -7,17 +7,49 @@ const CalendarView = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
 
+    const fetchPosts = async () => {
+        try {
+            const res = await api.get('posts/');
+            setPosts(res.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const res = await api.get('posts/');
-                setPosts(res.data);
-            } catch (err) {
-                console.error(err);
-            }
-        };
         fetchPosts();
     }, []);
+
+    const handleDragStart = (e, post) => {
+        e.dataTransfer.setData('post', JSON.stringify(post));
+    };
+
+    const handleDrop = async (e, droppedDate) => {
+        e.preventDefault();
+        try {
+            const postObjStr = e.dataTransfer.getData('post');
+            if (!postObjStr) return;
+            const post = JSON.parse(postObjStr);
+
+            const oldDateObj = new Date(post.scheduled_time);
+
+            const newDateObj = new Date(droppedDate);
+            newDateObj.setHours(oldDateObj.getHours());
+            newDateObj.setMinutes(oldDateObj.getMinutes());
+            newDateObj.setSeconds(oldDateObj.getSeconds());
+
+            const payload = {
+                content: post.content,
+                platform: post.platform,
+                scheduled_time: newDateObj.toISOString(),
+            };
+
+            await api.put(`posts/${post.id}/`, payload);
+            fetchPosts();
+        } catch (err) {
+            console.error("Drop failed: ", err);
+        }
+    };
 
     const daysInMonth = eachDayOfInterval({
         start: startOfMonth(currentDate),
@@ -65,6 +97,8 @@ const CalendarView = () => {
                             <div
                                 key={day.toString()}
                                 onClick={() => setSelectedDate(day)}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={(e) => handleDrop(e, day)}
                                 className={`min-h-[100px] bg-base-100 p-2 cursor-pointer hover:bg-emerald-50 transition ${isSelected ? 'ring-2 ring-emerald-500 ring-inset bg-emerald-50' : ''
                                     }`}
                             >
@@ -73,7 +107,9 @@ const CalendarView = () => {
                                     {dayPosts.map(post => (
                                         <div
                                             key={post.id}
-                                            className={`text-xs px-1.5 py-0.5 rounded truncate ${post.status === 'posted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                            draggable={true}
+                                            onDragStart={(e) => handleDragStart(e, post)}
+                                            className={`text-xs px-1.5 py-0.5 rounded truncate cursor-move ${post.status === 'posted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                                 }`}
                                         >
                                             {format(new Date(post.scheduled_time), 'HH:mm')}
