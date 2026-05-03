@@ -14,6 +14,7 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
     const [scheduledTime, setScheduledTime] = useState(postToEdit ? toLocalInputValue(postToEdit.scheduled_time) : '');
+    const [timeSuggestions, setTimeSuggestions] = useState([]);
     const [error, setError] = useState(null);
 
     if (!isOpen) return null;
@@ -80,12 +81,27 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
     const handleSuggestTime = async () => {
         try {
             const res = await api.get('suggestions/time/');
-            if (res.data.suggestions && res.data.suggestions.length > 0) {
-                setScheduledTime(toLocalInputValue(res.data.suggestions[0].time));
+            if (Array.isArray(res.data)) {
+                // If it's already showing, hide it, otherwise show it
+                setTimeSuggestions(timeSuggestions.length > 0 ? [] : res.data);
             }
         } catch (err) {
             console.error("Suggest time failed", err);
         }
+    };
+
+    const applyTimeSuggestion = (timeStr) => {
+        let datePart = '';
+        if (scheduledTime && scheduledTime.includes('T')) {
+            datePart = scheduledTime.split('T')[0];
+        } else {
+            // Default to today
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            datePart = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        }
+        setScheduledTime(`${datePart}T${timeStr}`);
+        setTimeSuggestions([]);
     };
 
     return (
@@ -152,6 +168,20 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
                                 value={scheduledTime}
                                 onChange={(e) => setScheduledTime(e.target.value)}
                             />
+                            {timeSuggestions.length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {timeSuggestions.map((t, idx) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => applyTimeSuggestion(t)}
+                                            className="px-3 py-1 bg-emerald-50 text-emerald-700 text-sm rounded-md border border-emerald-200 hover:bg-emerald-100 transition"
+                                        >
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                         <div className="pt-4 flex justify-end gap-3 border-t border-base-200">
                             <button

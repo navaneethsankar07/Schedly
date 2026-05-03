@@ -195,22 +195,9 @@ class TimeSuggestionView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        now = timezone.now()
-        
-        # Suggestion 1: In 2 hours
-        s1 = now + timedelta(hours=2)
-        
-        # Suggestion 2: In 6 hours
-        s2 = now + timedelta(hours=6)
-        
-        # Suggestion 3: Tomorrow at 9 AM
-        s3 = now + timedelta(days=1)
-        s3 = s3.replace(hour=9, minute=0, second=0, microsecond=0)
-        
-        return Response({
-            'suggestions': [
-                {'label': 'Next 2 hours', 'time': s1.isoformat()},
-                {'label': 'Later today (6hrs)', 'time': s2.isoformat()},
-                {'label': 'Tomorrow morning', 'time': s3.isoformat()},
-            ]
-        })
+        return Response([
+            "09:00",
+            "13:00",
+            "18:00",
+            "21:00"
+        ])
