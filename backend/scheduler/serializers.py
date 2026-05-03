@@ -31,15 +31,37 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class PostSerializer(serializers.ModelSerializer):
+    # Read-only helper so the frontend can know whether editing is allowed
+    is_past_due = serializers.SerializerMethodField()
+
     class Meta:
         model = Post
         fields = '__all__'
         read_only_fields = ('user', 'created_at', 'updated_at')
 
+    def get_is_past_due(self, obj):
+        return obj.scheduled_time <= timezone.now()
+
     def validate_scheduled_time(self, value):
-        if value < timezone.now():
+        # On CREATE: time must be in the future
+        if self.instance is None and value <= timezone.now():
             raise serializers.ValidationError("Scheduled time must be in the future.")
         return value
+
+    def validate(self, data):
+        # On UPDATE: block edits if the scheduled time has already passed
+        if self.instance is not None:
+            current_scheduled = data.get('scheduled_time', self.instance.scheduled_time)
+            if self.instance.scheduled_time <= timezone.now():
+                raise serializers.ValidationError(
+                    "This post cannot be edited because its scheduled time has already passed."
+                )
+            # If they're changing the scheduled time, the new value must also be in the future
+            if 'scheduled_time' in data and data['scheduled_time'] <= timezone.now():
+                raise serializers.ValidationError(
+                    {"scheduled_time": "Scheduled time must be in the future."}
+                )
+        return data
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:

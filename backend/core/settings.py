@@ -107,4 +107,21 @@ if env_path.exists():
     load_dotenv(env_path)
 
 GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID', 'placeholder')
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# ── Email (Gmail SMTP) ──────────────────────────────────────────────────────
+# Set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD (Gmail App Password) in .env
+# to send real emails.  Falls back to console output if not configured.
+_email_user = os.environ.get('EMAIL_HOST_USER', '')
+if _email_user:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 465
+    EMAIL_USE_SSL = True
+    EMAIL_USE_TLS = False
+    EMAIL_HOST_USER = _email_user
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+    DEFAULT_FROM_EMAIL = f'Scheduler App <{_email_user}>'
+    EMAIL_TIMEOUT = 10  # seconds — prevents scheduler thread from hanging
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'noreply@scheduler.com'
