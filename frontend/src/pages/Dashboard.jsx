@@ -21,6 +21,7 @@ const Dashboard = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [postToEdit, setPostToEdit] = useState(null);
     const [prefillContent, setPrefillContent] = useState('');
+    const [analytics, setAnalytics] = useState(null);
 
     const fetchPosts = async () => {
         try {
@@ -40,12 +41,23 @@ const Dashboard = () => {
         }
     };
 
+    const fetchAnalytics = async () => {
+        try {
+            const res = await api.get('analytics/');
+            setAnalytics(res.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         fetchPosts();
+        fetchAnalytics();
     }, [platformFilter]);
 
     useEffect(() => {
         fetchTemplates();
+        fetchAnalytics();
     }, []);
 
     const handleDelete = async (id) => {
@@ -85,6 +97,27 @@ const Dashboard = () => {
                     Create Post
                 </button>
             </div>
+
+            {analytics && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-300">
+                        <p className="text-sm text-base-content/60 font-medium">Total Posts</p>
+                        <p className="text-2xl font-bold text-base-content mt-1">{analytics.total_posts}</p>
+                    </div>
+                    <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-300">
+                        <p className="text-sm text-base-content/60 font-medium">Scheduled</p>
+                        <p className="text-2xl font-bold text-blue-600 mt-1">{analytics.scheduled_posts}</p>
+                    </div>
+                    <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-300">
+                        <p className="text-sm text-base-content/60 font-medium">Completed</p>
+                        <p className="text-2xl font-bold text-emerald-600 mt-1">{analytics.posted_posts}</p>
+                    </div>
+                    <div className="bg-emerald-50 p-4 rounded-xl shadow-sm border border-emerald-200">
+                        <p className="text-sm text-emerald-800 font-medium">Current Streak 🔥</p>
+                        <p className="text-2xl font-bold text-emerald-600 mt-1">{analytics.current_streak} days</p>
+                    </div>
+                </div>
+            )}
 
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-base-300 pb-2">
                 <div className="flex space-x-2">
