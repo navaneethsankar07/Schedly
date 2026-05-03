@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import PostForm from '../components/PostForm';
-import { Pencil, Trash2, CheckCircle, Plus, Globe } from 'lucide-react';
+import { Pencil, Trash2, CheckCircle, Plus, Globe, LockKeyhole } from 'lucide-react';
 import { FaXTwitter, FaLinkedin, FaInstagram, FaFacebook } from 'react-icons/fa6';
 import { format } from 'date-fns';
 
@@ -44,6 +44,13 @@ const Dashboard = () => {
         fetchPosts();
     };
 
+    // A post is "past due" if its scheduled_time is in the past
+    const isPastDue = (post) => {
+        // Use the serializer-provided field if available, else compute it
+        if (typeof post.is_past_due === 'boolean') return post.is_past_due;
+        return new Date(post.scheduled_time) <= new Date();
+    };
+
     const filteredPosts = posts.filter(post => {
         if (filter === 'upcoming') return post.status === 'scheduled';
         if (filter === 'completed') return post.status === 'posted';
@@ -77,49 +84,73 @@ const Dashboard = () => {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredPosts.map((post) => (
-                    <div key={post.id} className="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden hover:shadow-md transition">
-                        <div className="p-5">
-                            <div className="flex justify-between items-start">
-                                <div className="flex space-x-2">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.status === 'posted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                                        }`}>
-                                        {post.status.toUpperCase()}
-                                    </span>
-                                    {post.platform && post.platform !== 'General' && (
-                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-base-200 text-base-content shadow-sm border border-base-300">
-                                            {PLATFORM_ICONS[post.platform] || PLATFORM_ICONS['General']}
-                                            {post.platform}
+                {filteredPosts.map((post) => {
+                    const pastDue = isPastDue(post);
+                    return (
+                        <div key={post.id} className="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden hover:shadow-md transition">
+                            <div className="p-5">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.status === 'posted' ? 'bg-green-100 text-green-800' : pastDue ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-800'
+                                            }`}>
+                                            {post.status === 'posted' ? 'POSTED' : pastDue ? 'OVERDUE' : 'SCHEDULED'}
                                         </span>
+                                        {post.platform && post.platform !== 'General' && (
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-base-200 text-base-content shadow-sm border border-base-300">
+                                                {PLATFORM_ICONS[post.platform] || PLATFORM_ICONS['General']}
+                                                {post.platform}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        {/* Edit button — disabled when past due */}
+                                        {pastDue ? (
+                                            <span
+                                                title="Cannot edit: scheduled time has already passed"
+                                                className="text-base-content/20 cursor-not-allowed"
+                                            >
+                                                <LockKeyhole className="w-4 h-4" />
+                                            </span>
+                                        ) : (
+                                            <button
+                                                onClick={() => { setPostToEdit(post); setIsFormOpen(true); }}
+                                                className="text-base-content/40 hover:text-emerald-600 transition"
+                                                title="Edit post"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => handleDelete(post.id)}
+                                            className="text-base-content/40 hover:text-red-600 transition"
+                                            title="Delete post"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                                <p className="mt-4 text-sm text-base-content whitespace-pre-wrap line-clamp-4">{post.content}</p>
+                                <div className={`mt-4 text-xs flex items-center gap-1 ${pastDue && post.status !== 'posted' ? 'text-red-500' : 'text-base-content/60'}`}>
+                                    {pastDue && post.status !== 'posted' && (
+                                        <span className="mr-0.5">⚠️</span>
                                     )}
-                                </div>
-                                <div className="flex space-x-2">
-                                    <button onClick={() => { setPostToEdit(post); setIsFormOpen(true); }} className="text-base-content/40 hover:text-emerald-600 transition">
-                                        <Pencil className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={() => handleDelete(post.id)} className="text-base-content/40 hover:text-red-600 transition">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                    {format(new Date(post.scheduled_time), "MMM d, yyyy 'at' h:mm a")}
                                 </div>
                             </div>
-                            <p className="mt-4 text-sm text-base-content whitespace-pre-wrap line-clamp-4">{post.content}</p>
-                            <div className="mt-4 text-xs text-base-content/60 flex items-center">
-                                {format(new Date(post.scheduled_time), "MMM d, yyyy 'at' h:mm a")}
-                            </div>
+                            {post.status === 'scheduled' && (
+                                <div className="bg-base-200 px-5 py-3 border-t border-base-200">
+                                    <button
+                                        onClick={() => markPosted(post.id)}
+                                        className="w-full inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-emerald-700 bg-emerald-100 hover:bg-emerald-200 transition"
+                                    >
+                                        <CheckCircle className="w-4 h-4 mr-1.5" />
+                                        Mark as Posted
+                                    </button>
+                                </div>
+                            )}
                         </div>
-                        {post.status === 'scheduled' && (
-                            <div className="bg-base-200 px-5 py-3 border-t border-base-200">
-                                <button
-                                    onClick={() => markPosted(post.id)}
-                                    className="w-full inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-emerald-700 bg-emerald-100 hover:bg-emerald-200 transition"
-                                >
-                                    <CheckCircle className="w-4 h-4 mr-1.5" />
-                                    Mark as Posted
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
                 {filteredPosts.length === 0 && (
                     <div className="col-span-full py-12 text-center text-base-content/60">
                         No posts found.

@@ -18,6 +18,37 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit }) => {
 
     if (!isOpen) return null;
 
+    // Guard: prevent editing posts whose scheduled time has already passed
+    const isPastDue = postToEdit && new Date(postToEdit.scheduled_time) <= new Date();
+    if (isPastDue) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50">
+                <div className="bg-base-100 rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+                    <div className="px-6 py-4 border-b border-base-300 flex justify-between items-center">
+                        <h3 className="text-lg font-medium text-base-content">Edit Post</h3>
+                        <button onClick={onClose} className="text-base-content/40 hover:text-base-content/60 transition">
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="px-6 py-8 text-center space-y-3">
+                        <div className="text-4xl">🔒</div>
+                        <p className="text-base-content font-medium">This post cannot be edited.</p>
+                        <p className="text-sm text-base-content/60">
+                            The scheduled time for this post has already passed.<br />
+                            Past-due posts are locked to preserve the record.
+                        </p>
+                        <button
+                            onClick={onClose}
+                            className="mt-4 px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 transition"
+                        >
+                            Got it
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {

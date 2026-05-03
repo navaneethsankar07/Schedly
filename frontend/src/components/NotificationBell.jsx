@@ -9,11 +9,52 @@ const NotificationBell = () => {
     const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const previousNotifsRef = useRef(null);
+
+    const playNotificationSound = () => {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+
+            gainNode.gain.setValueAtTime(0, ctx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+
+            osc.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.5);
+        } catch (e) {
+            console.error("Audio playback failed", e);
+        }
+    };
 
     const fetchNotifications = async () => {
         try {
             const res = await api.get('notifications/');
-            setNotifications(res.data);
+            const data = res.data;
+
+            if (previousNotifsRef.current !== null) {
+                const prevUnreadIds = new Set(previousNotifsRef.current.filter(n => !n.is_read).map(n => n.id));
+                const hasNewUnread = data.some(n => !n.is_read && !prevUnreadIds.has(n.id));
+
+                if (hasNewUnread) {
+                    playNotificationSound();
+                }
+            }
+
+            previousNotifsRef.current = data;
+            setNotifications(data);
         } catch (err) {
             console.error(err);
         }
