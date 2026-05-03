@@ -26,7 +26,7 @@ const PostForm = ({ isOpen, onClose, postToEdit, prefillContent }) => {
     const isPastDue = postToEdit && new Date(postToEdit.scheduled_time) <= new Date();
     if (isPastDue) {
         return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                 <div className="bg-base-100 rounded-xl shadow-xl w-full max-w-md overflow-hidden">
                     <div className="px-6 py-4 border-b border-base-300 flex justify-between items-center">
                         <h3 className="text-lg font-medium text-base-content">Edit Post</h3>
@@ -109,7 +109,7 @@ const PostForm = ({ isOpen, onClose, postToEdit, prefillContent }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 transition-opacity">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
             <div className="bg-base-100 rounded-xl shadow-xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden transform transition-all h-[80vh]">
                 {/* Left Side: Form */}
                 <div className="flex-1 flex flex-col overflow-y-auto">
@@ -215,29 +215,29 @@ const PostForm = ({ isOpen, onClose, postToEdit, prefillContent }) => {
                     </form>
                 </div>
                 {/* Right Side: Preview */}
-                <div className="w-full md:w-96 bg-gray-50 flex flex-col border-t md:border-t-0 md:border-l border-base-300">
+                <div className="w-full md:w-96 bg-base-200 flex flex-col border-t md:border-t-0 md:border-l border-base-300">
                     <div className="px-6 py-4 border-b border-base-300 bg-base-100 flex-shrink-0">
-                        <h3 className="text-lg font-medium text-base-content">Preview</h3>
+                        <h3 className="text-lg font-semibold text-base-content">Preview</h3>
                     </div>
-                    <div className="flex-1 p-6 flex justify-center items-start overflow-y-auto bg-gray-100">
+                    <div className="flex-1 p-6 flex justify-center items-start overflow-y-auto bg-base-200">
                         {/* Dynamic Platform Preview Card */}
                         {(platform === 'Instagram' || platform === 'Facebook' || platform === 'General') && (
-                            <div className="bg-white border border-gray-200 rounded-[30px] w-full max-w-[320px] pb-4 shadow-sm overflow-hidden flex flex-col">
-                                <div className="flex items-center p-3 border-b border-gray-100">
+                            <div className="bg-c-card border border-c-border rounded-[20px] w-full max-w-[320px] pb-4 shadow-sm overflow-hidden flex flex-col">
+                                <div className="flex items-center p-3 border-b border-c-border">
                                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 p-[2px]">
-                                        <div className="w-full h-full bg-white rounded-full flex items-center justify-center text-[10px] font-bold">You</div>
+                                        <div className="w-full h-full bg-c-card rounded-full flex items-center justify-center text-[10px] font-bold text-c-text">You</div>
                                     </div>
-                                    <div className="ml-2 font-semibold text-sm">{username || 'your_username'}</div>
+                                    <div className="ml-2 font-semibold text-sm text-c-text">{username || 'your_username'}</div>
                                 </div>
-                                <div className="w-full aspect-square bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                                <div className="w-full aspect-square bg-base-200 flex items-center justify-center text-c-muted text-sm">
                                     [Media Content]
                                 </div>
-                                <div className="flex px-3 py-2 space-x-3 text-gray-600">
+                                <div className="flex px-3 py-2 space-x-3 text-c-muted">
                                     <svg aria-label="Like" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16.792 3.904A4.989 4.989 0 0121.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.287-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 014.708-5.218 4.21 4.21 0 013.675 1.941c.84 1.175.98 1.543 1.117 1.543s.277-.368 1.117-1.543a4.21 4.21 0 013.675-1.941z" fill="none" stroke="currentColor" strokeWidth="2"></path></svg>
                                     <svg aria-label="Comment" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.656 17.008a9.993 9.993 0 10-3.59 3.615L22 22z" fill="none" stroke="currentColor" strokeWidth="2"></path></svg>
                                     <svg aria-label="Share" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><line points="22 3 9.218 10.083" fill="none" stroke="currentColor" strokeWidth="2"></line><polygon points="11.698 20.334 22 3.001 2 3.001 9.218 10.084 11.698 20.334" fill="none" stroke="currentColor" strokeWidth="2"></polygon></svg>
                                 </div>
-                                <div className="px-3 text-sm text-gray-800">
+                                <div className="px-3 text-sm text-c-text">
                                     <span className="font-semibold mr-1">{username || 'your_username'}</span>
                                     <span className="whitespace-pre-wrap">{content || 'Your caption will appear here...'}</span>
                                 </div>
@@ -245,21 +245,21 @@ const PostForm = ({ isOpen, onClose, postToEdit, prefillContent }) => {
                         )}
 
                         {platform === 'LinkedIn' && (
-                            <div className="bg-white border border-gray-200 rounded-lg w-full max-w-[320px] pb-4 shadow-sm overflow-hidden flex flex-col">
+                            <div className="bg-c-card border border-c-border rounded-lg w-full max-w-[320px] pb-4 shadow-sm overflow-hidden flex flex-col">
                                 <div className="flex items-center p-3">
-                                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">You</div>
+                                    <div className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center text-xs font-bold text-c-muted">You</div>
                                     <div className="ml-3 flex flex-col">
-                                        <span className="font-semibold text-sm text-gray-900">{username || 'Your Name'}</span>
-                                        <span className="text-xs text-gray-500">Professional Title • 1st</span>
+                                        <span className="font-semibold text-sm text-c-text">{username || 'Your Name'}</span>
+                                        <span className="text-xs text-c-muted">Professional Title • 1st</span>
                                     </div>
                                 </div>
-                                <div className="px-3 mb-2 text-sm text-gray-800 whitespace-pre-wrap flex-1">
+                                <div className="px-3 mb-2 text-sm text-c-text whitespace-pre-wrap flex-1">
                                     {content || 'What do you want to talk about?'}
                                 </div>
-                                <div className="w-full aspect-video bg-gray-100 flex items-center justify-center text-gray-400 text-sm mt-2 border-y border-gray-100">
+                                <div className="w-full aspect-video bg-base-200 flex items-center justify-center text-c-muted text-sm mt-2 border-y border-c-border">
                                     [Media Content]
                                 </div>
-                                <div className="flex px-4 py-2 space-x-6 text-gray-500 text-xs font-medium border-t border-gray-100 mt-2">
+                                <div className="flex px-4 py-2 space-x-6 text-c-muted text-xs font-medium border-t border-c-border mt-2">
                                     <span className="flex items-center gap-1"><span className="text-lg">👍</span> Like</span>
                                     <span className="flex items-center gap-1"><span className="text-lg">💬</span> Comment</span>
                                     <span className="flex items-center gap-1"><span className="text-lg">🔁</span> Repost</span>
@@ -268,21 +268,21 @@ const PostForm = ({ isOpen, onClose, postToEdit, prefillContent }) => {
                         )}
 
                         {platform === 'X' && (
-                            <div className="bg-white border border-gray-200 rounded-xl w-full max-w-[320px] p-4 shadow-sm overflow-hidden flex flex-col">
+                            <div className="bg-c-card border border-c-border rounded-xl w-full max-w-[320px] p-4 shadow-sm overflow-hidden flex flex-col">
                                 <div className="flex items-start">
-                                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0">You</div>
+                                    <div className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center text-xs font-bold text-c-muted flex-shrink-0">You</div>
                                     <div className="ml-3 flex flex-col w-full">
                                         <div className="flex items-center gap-1">
-                                            <span className="font-bold text-sm text-gray-900 leading-tight">{username || 'Your Name'}</span>
-                                            <span className="text-sm text-gray-500 leading-tight">@{username || 'your_username'}</span>
+                                            <span className="font-bold text-sm text-c-text leading-tight">{username || 'Your Name'}</span>
+                                            <span className="text-sm text-c-muted leading-tight">@{username || 'your_username'}</span>
                                         </div>
-                                        <div className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">
+                                        <div className="mt-1 text-sm text-c-text whitespace-pre-wrap">
                                             {content || "What's happening?"}
                                         </div>
-                                        <div className="w-full aspect-video bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 text-sm mt-3 border border-gray-100">
+                                        <div className="w-full aspect-video bg-base-200 rounded-xl flex items-center justify-center text-c-muted text-sm mt-3 border border-c-border">
                                             [Media Optional]
                                         </div>
-                                        <div className="flex justify-between text-gray-500 mt-3 max-w-xs pr-4 text-xs">
+                                        <div className="flex justify-between text-c-muted mt-3 max-w-xs pr-4 text-xs">
                                             <span className="hover:text-blue-500 transition cursor-pointer">💬</span>
                                             <span className="hover:text-green-500 transition cursor-pointer">🔁</span>
                                             <span className="hover:text-red-500 transition cursor-pointer">❤️</span>
