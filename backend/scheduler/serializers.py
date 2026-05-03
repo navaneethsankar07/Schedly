@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Post, Profile, Notification
+from .models import Post, Profile, Notification, Template
 from django.utils import timezone
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -68,3 +68,9 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = ['id', 'user', 'message', 'is_read', 'created_at']
         read_only_fields = ['id', 'user', 'created_at']
+
+class TemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Template
+        fields = ['id', 'title', 'content', 'created_at']
+        read_only_fields = ['id', 'created_at']

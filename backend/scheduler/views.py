@@ -9,8 +9,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
 from django.contrib.auth.models import User
-from .models import Post, Profile, Notification
-from .serializers import RegisterSerializer, PostSerializer, UserSerializer, NotificationSerializer
+from .models import Post, Profile, Notification, Template
+from .serializers import RegisterSerializer, PostSerializer, UserSerializer, NotificationSerializer, TemplateSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -108,3 +108,13 @@ class NotificationViewSet(viewsets.ModelViewSet):
     def mark_all_read(self, request):
         self.get_queryset().update(is_read=True)
         return Response({'status': 'all marked as read'})
+
+class TemplateViewSet(viewsets.ModelViewSet):
+    serializer_class = TemplateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Template.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

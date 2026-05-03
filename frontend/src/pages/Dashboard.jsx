@@ -15,9 +15,11 @@ const PLATFORM_ICONS = {
 
 const Dashboard = () => {
     const [posts, setPosts] = useState([]);
+    const [templates, setTemplates] = useState([]);
     const [filter, setFilter] = useState('all');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [postToEdit, setPostToEdit] = useState(null);
+    const [prefillContent, setPrefillContent] = useState('');
 
     const fetchPosts = async () => {
         try {
@@ -28,8 +30,18 @@ const Dashboard = () => {
         }
     };
 
+    const fetchTemplates = async () => {
+        try {
+            const res = await api.get('templates/');
+            setTemplates(res.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         fetchPosts();
+        fetchTemplates();
     }, []);
 
     const handleDelete = async (id) => {
@@ -62,7 +74,7 @@ const Dashboard = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 className="text-2xl font-bold text-base-content">Dashboard</h1>
                 <button
-                    onClick={() => { setPostToEdit(null); setIsFormOpen(true); }}
+                    onClick={() => { setPostToEdit(null); setPrefillContent(''); setIsFormOpen(true); }}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 transition"
                 >
                     <Plus className="w-4 h-4 mr-2" />
@@ -82,6 +94,32 @@ const Dashboard = () => {
                     </button>
                 ))}
             </div>
+
+            {templates.length > 0 && (
+                <div className="mb-6">
+                    <h2 className="text-lg font-bold text-base-content mb-3">Templates</h2>
+                    <div className="flex gap-4 overflow-x-auto pb-2">
+                        {templates.map(template => (
+                            <div key={template.id} className="min-w-[250px] bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm flex flex-col justify-between">
+                                <div>
+                                    <h3 className="font-semibold text-base-content">{template.title}</h3>
+                                    <p className="text-sm text-base-content/60 mt-1 line-clamp-2">{template.content}</p>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setPostToEdit(null);
+                                        setPrefillContent(template.content);
+                                        setIsFormOpen(true);
+                                    }}
+                                    className="mt-4 px-3 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-md hover:bg-emerald-200 transition text-center"
+                                >
+                                    Use Template
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredPosts.map((post) => {
@@ -163,6 +201,7 @@ const Dashboard = () => {
                 onClose={() => setIsFormOpen(false)}
                 fetchPosts={fetchPosts}
                 postToEdit={postToEdit}
+                prefillContent={prefillContent}
             />
         </div>
     );

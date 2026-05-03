@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import api from '../services/api';
 import { X } from 'lucide-react';
 
-const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit }) => {
-    const [content, setContent] = useState(postToEdit ? postToEdit.content : '');
+const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) => {
+    const [content, setContent] = useState(postToEdit ? postToEdit.content : (prefillContent || ''));
     const [platform, setPlatform] = useState(postToEdit ? postToEdit.platform : 'General');
     // Prefill edit form: convert stored UTC ISO string → local datetime-local string
     const toLocalInputValue = (utcStr) => {
