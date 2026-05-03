@@ -77,6 +77,17 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
         }
     };
 
+    const handleSuggestTime = async () => {
+        try {
+            const res = await api.get('suggestions/time/');
+            if (res.data.suggestions && res.data.suggestions.length > 0) {
+                setScheduledTime(toLocalInputValue(res.data.suggestions[0].time));
+            }
+        } catch (err) {
+            console.error("Suggest time failed", err);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 transition-opacity">
             <div className="bg-base-100 rounded-xl shadow-xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden transform transition-all h-[80vh]">
@@ -124,7 +135,16 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-base-content/80">Scheduled Time</label>
+                            <div className="flex justify-between items-center mb-1">
+                                <label className="block text-sm font-medium text-base-content/80">Scheduled Time</label>
+                                <button
+                                    type="button"
+                                    onClick={handleSuggestTime}
+                                    className="text-xs text-blue-600 hover:text-blue-800 font-medium bg-blue-50 px-2 py-1 rounded"
+                                >
+                                    🕒 Suggest Time
+                                </button>
+                            </div>
                             <input
                                 type="datetime-local"
                                 required
