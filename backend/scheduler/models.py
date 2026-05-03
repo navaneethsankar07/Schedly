@@ -30,6 +30,7 @@ class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField()
     platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES, default='General')
+    username = models.CharField(max_length=255, blank=True, default='your_username')
     image = models.ImageField(upload_to='posts/', null=True, blank=True)
     scheduled_time = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')

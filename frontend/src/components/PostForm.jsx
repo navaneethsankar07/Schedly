@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) => {
     const [content, setContent] = useState(postToEdit ? postToEdit.content : (prefillContent || ''));
     const [platform, setPlatform] = useState(postToEdit ? postToEdit.platform : 'General');
+    const [username, setUsername] = useState(postToEdit ? postToEdit.username : '');
     // Prefill edit form: convert stored UTC ISO string → local datetime-local string
     const toLocalInputValue = (utcStr) => {
         if (!utcStr) return '';
@@ -55,7 +56,7 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
         try {
             // Convert the local datetime-local value to a UTC ISO string for Django
             const utcIso = new Date(scheduledTime).toISOString();
-            const payload = { content, platform, scheduled_time: utcIso };
+            const payload = { content, platform, scheduled_time: utcIso, username };
             if (postToEdit) {
                 await api.put(`posts/${postToEdit.id}/`, payload);
             } else {
@@ -144,11 +145,21 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
                                 className="block w-full rounded-md border-base-content/20 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-3 border"
                             >
                                 <option value="General">General</option>
-                                <option value="X">X</option>
+                                <option value="X">X (Twitter)</option>
                                 <option value="LinkedIn">LinkedIn</option>
                                 <option value="Instagram">Instagram</option>
                                 <option value="Facebook">Facebook</option>
                             </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-base-content/80 mb-1">Username (Optional)</label>
+                            <input
+                                type="text"
+                                placeholder="your_username"
+                                className="block w-full rounded-md border-base-content/20 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-3 border"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                            />
                         </div>
                         <div>
                             <div className="flex justify-between items-center mb-1">
@@ -206,30 +217,78 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
                         <h3 className="text-lg font-medium text-base-content">Preview</h3>
                     </div>
                     <div className="flex-1 p-6 flex justify-center items-start overflow-y-auto bg-gray-100">
-                        <div className="bg-white border border-gray-200 rounded-[30px] w-full max-w-[320px] pb-4 shadow-sm overflow-hidden flex flex-col">
-                            {/* Instagram style header */}
-                            <div className="flex items-center p-3 border-b border-gray-100">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 p-[2px]">
-                                    <div className="w-full h-full bg-white rounded-full flex items-center justify-center text-[10px] font-bold">You</div>
+                        {/* Dynamic Platform Preview Card */}
+                        {(platform === 'Instagram' || platform === 'Facebook' || platform === 'General') && (
+                            <div className="bg-white border border-gray-200 rounded-[30px] w-full max-w-[320px] pb-4 shadow-sm overflow-hidden flex flex-col">
+                                <div className="flex items-center p-3 border-b border-gray-100">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 p-[2px]">
+                                        <div className="w-full h-full bg-white rounded-full flex items-center justify-center text-[10px] font-bold">You</div>
+                                    </div>
+                                    <div className="ml-2 font-semibold text-sm">{username || 'your_username'}</div>
                                 </div>
-                                <div className="ml-2 font-semibold text-sm">your_account</div>
+                                <div className="w-full aspect-square bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                                    [Media Content]
+                                </div>
+                                <div className="flex px-3 py-2 space-x-3 text-gray-600">
+                                    <svg aria-label="Like" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16.792 3.904A4.989 4.989 0 0121.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.287-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 014.708-5.218 4.21 4.21 0 013.675 1.941c.84 1.175.98 1.543 1.117 1.543s.277-.368 1.117-1.543a4.21 4.21 0 013.675-1.941z" fill="none" stroke="currentColor" strokeWidth="2"></path></svg>
+                                    <svg aria-label="Comment" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.656 17.008a9.993 9.993 0 10-3.59 3.615L22 22z" fill="none" stroke="currentColor" strokeWidth="2"></path></svg>
+                                    <svg aria-label="Share" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><line points="22 3 9.218 10.083" fill="none" stroke="currentColor" strokeWidth="2"></line><polygon points="11.698 20.334 22 3.001 2 3.001 9.218 10.084 11.698 20.334" fill="none" stroke="currentColor" strokeWidth="2"></polygon></svg>
+                                </div>
+                                <div className="px-3 text-sm text-gray-800">
+                                    <span className="font-semibold mr-1">{username || 'your_username'}</span>
+                                    <span className="whitespace-pre-wrap">{content || 'Your caption will appear here...'}</span>
+                                </div>
                             </div>
-                            {/* Image placeholder */}
-                            <div className="w-full aspect-square bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
-                                [Media Content]
+                        )}
+
+                        {platform === 'LinkedIn' && (
+                            <div className="bg-white border border-gray-200 rounded-lg w-full max-w-[320px] pb-4 shadow-sm overflow-hidden flex flex-col">
+                                <div className="flex items-center p-3">
+                                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">You</div>
+                                    <div className="ml-3 flex flex-col">
+                                        <span className="font-semibold text-sm text-gray-900">{username || 'Your Name'}</span>
+                                        <span className="text-xs text-gray-500">Professional Title • 1st</span>
+                                    </div>
+                                </div>
+                                <div className="px-3 mb-2 text-sm text-gray-800 whitespace-pre-wrap flex-1">
+                                    {content || 'What do you want to talk about?'}
+                                </div>
+                                <div className="w-full aspect-video bg-gray-100 flex items-center justify-center text-gray-400 text-sm mt-2 border-y border-gray-100">
+                                    [Media Content]
+                                </div>
+                                <div className="flex px-4 py-2 space-x-6 text-gray-500 text-xs font-medium border-t border-gray-100 mt-2">
+                                    <span className="flex items-center gap-1"><span className="text-lg">👍</span> Like</span>
+                                    <span className="flex items-center gap-1"><span className="text-lg">💬</span> Comment</span>
+                                    <span className="flex items-center gap-1"><span className="text-lg">🔁</span> Repost</span>
+                                </div>
                             </div>
-                            {/* Actions / Icons dummy */}
-                            <div className="flex px-3 py-2 space-x-3 text-gray-600">
-                                <svg aria-label="Like" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16.792 3.904A4.989 4.989 0 0121.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.287-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 014.708-5.218 4.21 4.21 0 013.675 1.941c.84 1.175.98 1.543 1.117 1.543s.277-.368 1.117-1.543a4.21 4.21 0 013.675-1.941z" fill="none" stroke="currentColor" strokeWidth="2"></path></svg>
-                                <svg aria-label="Comment" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.656 17.008a9.993 9.993 0 10-3.59 3.615L22 22z" fill="none" stroke="currentColor" strokeWidth="2"></path></svg>
-                                <svg aria-label="Share" className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><line points="22 3 9.218 10.083" fill="none" stroke="currentColor" strokeWidth="2"></line><polygon points="11.698 20.334 22 3.001 2 3.001 9.218 10.084 11.698 20.334" fill="none" stroke="currentColor" strokeWidth="2"></polygon></svg>
+                        )}
+
+                        {platform === 'X' && (
+                            <div className="bg-white border border-gray-200 rounded-xl w-full max-w-[320px] p-4 shadow-sm overflow-hidden flex flex-col">
+                                <div className="flex items-start">
+                                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0">You</div>
+                                    <div className="ml-3 flex flex-col w-full">
+                                        <div className="flex items-center gap-1">
+                                            <span className="font-bold text-sm text-gray-900 leading-tight">{username || 'Your Name'}</span>
+                                            <span className="text-sm text-gray-500 leading-tight">@{username || 'your_username'}</span>
+                                        </div>
+                                        <div className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">
+                                            {content || "What's happening?"}
+                                        </div>
+                                        <div className="w-full aspect-video bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 text-sm mt-3 border border-gray-100">
+                                            [Media Optional]
+                                        </div>
+                                        <div className="flex justify-between text-gray-500 mt-3 max-w-xs pr-4 text-xs">
+                                            <span className="hover:text-blue-500 transition cursor-pointer">💬</span>
+                                            <span className="hover:text-green-500 transition cursor-pointer">🔁</span>
+                                            <span className="hover:text-red-500 transition cursor-pointer">❤️</span>
+                                            <span className="hover:text-blue-500 transition cursor-pointer">📊</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            {/* Caption preview */}
-                            <div className="px-3 text-sm text-gray-800">
-                                <span className="font-semibold mr-1">your_account</span>
-                                <span className="whitespace-pre-wrap">{content || 'Your caption will appear here...'}</span>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
