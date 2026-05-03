@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 import { X } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 
-const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) => {
+const PostForm = ({ isOpen, onClose, postToEdit, prefillContent }) => {
+    const queryClient = useQueryClient();
     const [content, setContent] = useState(postToEdit ? postToEdit.content : (prefillContent || ''));
     const [platform, setPlatform] = useState(postToEdit ? postToEdit.platform : 'General');
     const [username, setUsername] = useState(postToEdit ? postToEdit.username : '');
@@ -62,7 +64,8 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
             } else {
                 await api.post('posts/', payload);
             }
-            fetchPosts();
+            queryClient.invalidateQueries({ queryKey: ['posts'] });
+            queryClient.invalidateQueries({ queryKey: ['analytics'] });
             onClose();
         } catch (err) {
             setError(err.response?.data?.scheduled_time?.[0] || 'Error submitting post');

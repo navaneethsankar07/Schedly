@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import api from '../services/api';
 import PostForm from '../components/PostForm';
 import { Pencil, Trash2, CheckCircle, Plus, Globe, LockKeyhole } from 'lucide-react';
 import { FaXTwitter, FaLinkedin, FaInstagram, FaFacebook } from 'react-icons/fa6';
 import { format } from 'date-fns';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const PLATFORM_ICONS = {
     X: <FaXTwitter className="w-3.5 h-3.5 flex-shrink-0 text-neutral-900 dark:text-white" />,
@@ -14,62 +15,65 @@ const PLATFORM_ICONS = {
 };
 
 const Dashboard = () => {
-    const [posts, setPosts] = useState([]);
-    const [templates, setTemplates] = useState([]);
+    const queryClient = useQueryClient();
     const [filter, setFilter] = useState('all');
     const [platformFilter, setPlatformFilter] = useState('All');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [postToEdit, setPostToEdit] = useState(null);
     const [prefillContent, setPrefillContent] = useState('');
-    const [analytics, setAnalytics] = useState(null);
 
-    const fetchPosts = async () => {
-        try {
+    const { data: posts = [] } = useQuery({
+        queryKey: ['posts', platformFilter.toLowerCase()],
+        queryFn: async () => {
             const res = await api.get(`posts/?category=${platformFilter.toLowerCase()}`);
-            setPosts(res.data);
-        } catch (err) {
-            console.error(err);
+            return res.data;
         }
-    };
+    });
 
-    const fetchTemplates = async () => {
-        try {
+    const { data: templates = [] } = useQuery({
+        queryKey: ['templates'],
+        queryFn: async () => {
             const res = await api.get('templates/');
-            setTemplates(res.data);
-        } catch (err) {
-            console.error(err);
+            return res.data;
         }
-    };
+    });
 
-    const fetchAnalytics = async () => {
-        try {
+    const { data: analytics = null } = useQuery({
+        queryKey: ['analytics'],
+        queryFn: async () => {
             const res = await api.get('analytics/');
-            setAnalytics(res.data);
-        } catch (err) {
-            console.error(err);
+            return res.data;
         }
-    };
+    });
 
-    useEffect(() => {
-        fetchPosts();
-        fetchAnalytics();
-    }, [platformFilter]);
-
-    useEffect(() => {
-        fetchTemplates();
-        fetchAnalytics();
-    }, []);
-
-    const handleDelete = async (id) => {
-        if (window.confirm("Are you sure?")) {
+    const deleteMutation = useMutation({
+        mutationFn: async (id) => {
             await api.delete(`posts/${id}/`);
-            fetchPosts();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['posts'] });
+            queryClient.invalidateQueries({ queryKey: ['analytics'] });
+        }
+    });
+
+    const markPostedMutation = useMutation({
+        mutationFn: async (id) => {
+            await api.patch(`posts/${id}/mark-posted/`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['posts'] });
+            queryClient.invalidateQueries({ queryKey: ['analytics'] });
+        }
+    });
+
+    const handleDelete = (id) => {
+        if (window.confirm("Are you sure?")) {
+            deleteMutation.mutate(id);
         }
     };
 
-    const markPosted = async (id) => {
-        await api.patch(`posts/${id}/mark-posted/`);
-        fetchPosts();
+    const markPosted = (id) => {
+        markPostedMutation.mutate(id);
     };
 
     // A post is "past due" if its scheduled_time is in the past
@@ -253,7 +257,6 @@ const Dashboard = () => {
             <PostForm
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
-                fetchPosts={fetchPosts}
                 postToEdit={postToEdit}
                 prefillContent={prefillContent}
             />
