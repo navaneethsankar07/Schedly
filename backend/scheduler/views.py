@@ -175,19 +175,48 @@ class ImproveCaptionView(APIView):
             'coding': '👨‍💻', 'new': '✨', 'update': '🚀', 'design': '🎨', 'coffee': '☕',
             'great': '🌟', 'awesome': '🔥', 'congrats': '🎉', 'time': '⏳', 'idea': '💡'
         }
-        hashtags = ['#updates', '#community', '#journey', '#growth']
+        
+        stopwords = {"the", "is", "at", "which", "and", "on", "in", "to", "a", "an", "for", "with", "about", "as", "by", "this", "my", "today", "of", "it", "that", "are", "you", "we", "they", "i", "just", "so", "be", "or"}
+        hashtag_dict = {
+            "fitness": ["#fitness", "#workout", "#health"],
+            "coding": ["#coding", "#developer", "#programming"],
+            "business": ["#startup", "#entrepreneur", "#business"],
+            "study": ["#study", "#learning", "#student"],
+            "travel": ["#travel", "#explore", "#wanderlust"]
+        }
         
         words = content.split()
         improved_words = []
+        clean_words = []
+        
+        import re
         for word in words:
             clean_word = word.lower().strip(',.!?')
             improved_words.append(word)
             if clean_word in emoji_map:
                 improved_words.append(emoji_map[clean_word])
                 
+            cleaned_alpha = re.sub(r'[^a-z]', '', clean_word)
+            if cleaned_alpha and cleaned_alpha not in stopwords and len(cleaned_alpha) > 2:
+                clean_words.append(cleaned_alpha)
+                
+        collected_hashtags = []
+        for cw in clean_words:
+            for key, tags in hashtag_dict.items():
+                if key in cw or cw in key:
+                    collected_hashtags.extend(tags)
+                    
+        # Remove duplicates while preserving order
+        collected_hashtags = list(dict.fromkeys(collected_hashtags))
+        
+        if not collected_hashtags:
+            collected_hashtags = ["#daily", "#updates", "#community", "#journey", "#growth", "#vibes"]
+            
+        collected_hashtags = collected_hashtags[:8]
+                
         improved_content = ' '.join(improved_words)
         improved_content = improved_content.replace('. ', '.\n\n')
-        improved_content += f"\n\n{' '.join(hashtags)}"
+        improved_content += f"\n\n{' '.join(collected_hashtags)}"
         
         return Response({'improved_content': improved_content})
 
