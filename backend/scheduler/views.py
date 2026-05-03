@@ -161,3 +161,32 @@ class AnalyticsView(APIView):
             'posted_posts': posted_posts,
             'current_streak': streak
         })
+
+class ImproveCaptionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        content = request.data.get('content', '')
+        if not content:
+            return Response({'improved_content': ''})
+
+        emoji_map = {
+            'excited': '🤩', 'happy': '😊', 'sad': '😢', 'love': '❤️', 'tech': '💻', 
+            'coding': '👨‍💻', 'new': '✨', 'update': '🚀', 'design': '🎨', 'coffee': '☕',
+            'great': '🌟', 'awesome': '🔥', 'congrats': '🎉', 'time': '⏳', 'idea': '💡'
+        }
+        hashtags = ['#updates', '#community', '#journey', '#growth']
+        
+        words = content.split()
+        improved_words = []
+        for word in words:
+            clean_word = word.lower().strip(',.!?')
+            improved_words.append(word)
+            if clean_word in emoji_map:
+                improved_words.append(emoji_map[clean_word])
+                
+        improved_content = ' '.join(improved_words)
+        improved_content = improved_content.replace('. ', '.\n\n')
+        improved_content += f"\n\n{' '.join(hashtags)}"
+        
+        return Response({'improved_content': improved_content})

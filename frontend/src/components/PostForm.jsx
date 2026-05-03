@@ -67,6 +67,16 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
         }
     };
 
+    const handleImproveCaption = async () => {
+        if (!content) return;
+        try {
+            const res = await api.post('caption/improve/', { content });
+            setContent(res.data.improved_content);
+        } catch (err) {
+            console.error("Improve caption failed", err);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 transition-opacity">
             <div className="bg-base-100 rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
@@ -79,7 +89,16 @@ const PostForm = ({ isOpen, onClose, fetchPosts, postToEdit, prefillContent }) =
                 <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
                     {error && <p className="text-red-500 text-sm">{error}</p>}
                     <div>
-                        <label className="block text-sm font-medium text-base-content/80">Caption</label>
+                        <div className="flex justify-between items-center mb-1">
+                            <label className="block text-sm font-medium text-base-content/80">Caption</label>
+                            <button
+                                type="button"
+                                onClick={handleImproveCaption}
+                                className="text-xs text-blue-600 hover:text-blue-800 font-medium bg-blue-50 px-2 py-1 rounded"
+                            >
+                                ✨ Improve Caption
+                            </button>
+                        </div>
                         <textarea
                             required
                             className="mt-1 block w-full rounded-md border-base-content/20 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-3 border"
