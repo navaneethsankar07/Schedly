@@ -122,3 +122,42 @@ class TemplateViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+from datetime import timedelta
+from django.utils import timezone
+
+class AnalyticsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        posts = Post.objects.filter(user=user)
+        total_posts = posts.count()
+        scheduled_posts = posts.filter(status='scheduled').count()
+        posted_posts = posts.filter(status='posted').count()
+
+        posted_dates = set(
+            p.scheduled_time.date() for p in posts.filter(status='posted')
+        )
+        
+        streak = 0
+        current_date = timezone.now().date()
+        
+        if current_date in posted_dates:
+            check_date = current_date
+        elif (current_date - timedelta(days=1)) in posted_dates:
+            check_date = current_date - timedelta(days=1)
+        else:
+            check_date = None
+            
+        if check_date:
+            while check_date in posted_dates:
+                streak += 1
+                check_date -= timedelta(days=1)
+
+        return Response({
+            'total_posts': total_posts,
+            'scheduled_posts': scheduled_posts,
+            'posted_posts': posted_posts,
+            'current_streak': streak
+        })
