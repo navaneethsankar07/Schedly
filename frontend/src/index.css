@@ -2,4 +2,95 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+    .glass-card {
+        @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+    }
+    .neon-text-glow {
+        text-shadow: 0 0 10px theme('colors.primary'), 0 0 20px theme('colors.primary');
+    }
+}
+
+@layer components {
+    .floating-orb {
+        animation: float 6s ease-in-out infinite;
+    }
+    .pulsing-glow {
+        animation: pulse-glow 3s ease-in-out infinite alternate;
+    }
+    .float-slow {
+        animation: float-slow 10s linear infinite;
+    }
+    .float-delayed {
+        animation: float 7s ease-in-out infinite 2s;
+    }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(2deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes float-slow {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 0.1; }
+    33% { transform: translate(30px, -50px) rotate(45deg); opacity: 0.3; }
+    66% { transform: translate(-20px, 20px) rotate(90deg); opacity: 0.15; }
+    100% { transform: translate(0, 0) rotate(180deg); opacity: 0.1; }
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); }
+    100% { box-shadow: 0 0 35px rgba(99, 102, 241, 0.8), 0 0 60px rgba(168, 85, 247, 0.5); }
+}
+
+/* ── Micro-interactions ── */
+/* Input focus glow */
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25), 0 1px 3px rgba(0,0,0,0.06);
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    transition: box-shadow 200ms ease, border-color 200ms ease;
+}
+
+/* Button ripple overlay */
+button {
+    position: relative;
+    overflow: hidden;
+}
+button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.3s ease, transform 0.4s ease;
+    border-radius: inherit;
+    pointer-events: none;
+}
+button:active::after {
+    opacity: 1;
+    transform: scale(2.5);
+    transition: opacity 0s, transform 0s;
+}
+
+/* Smooth page fade-in */
+@keyframes page-enter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+main, .space-y-6, .space-y-8 {
+    animation: page-enter 300ms ease forwards;
+}
+
+/* Post card hover lift */
+.post-card {
+    transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.post-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 12px 40px -8px rgba(99, 102, 241, 0.2);
+}
+
 /* DaisyUI provides theme variables natively */

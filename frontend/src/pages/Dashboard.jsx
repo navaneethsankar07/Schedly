@@ -5,6 +5,9 @@ import { Pencil, Trash2, CheckCircle, Plus, Globe, LockKeyhole } from 'lucide-re
 import { FaXTwitter, FaLinkedin, FaInstagram, FaFacebook } from 'react-icons/fa6';
 import { format } from 'date-fns';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import CountUpNumber from '../components/CountUpNumber';
+import TutorialOverlay from '../components/TutorialOverlay';
+import MascotOrb from '../components/MascotOrb';
 
 const PLATFORM_ICONS = {
     X: <FaXTwitter className="w-3.5 h-3.5 flex-shrink-0 text-neutral-900 dark:text-white" />,
@@ -90,66 +93,91 @@ const Dashboard = () => {
     }).sort((a, b) => new Date(a.scheduled_time) - new Date(b.scheduled_time));
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-2xl font-bold text-base-content">Dashboard</h1>
-                <button
-                    onClick={() => { setPostToEdit(null); setPrefillContent(''); setIsFormOpen(true); }}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 transition"
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Post
-                </button>
+        <div className="space-y-8 relative">
+            <TutorialOverlay />
+
+            {/* Gradient Header */}
+            <div className="relative bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-2xl p-8 overflow-hidden shadow-lg border border-white/20">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl transform -translate-y-1/2 translate-x-1/3 float-slow pointer-events-none"></div>
+                <div className="absolute bottom-0 left-10 w-40 h-40 bg-pink-500/20 rounded-full blur-2xl transform translate-y-1/2 -translate-x-1/2 float-delayed pointer-events-none"></div>
+
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative z-10 w-full text-white">
+                    <div className="flex items-center gap-6">
+                        <div className="hidden md:block">
+                            <MascotOrb className="w-16 h-16 drop-shadow-md" expression="smile" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-sm">Your Workspace</h1>
+                            <p className="text-white/80 font-medium mt-1">Let's plan your next big moment.</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => { setPostToEdit(null); setPrefillContent(''); setIsFormOpen(true); }}
+                        className="inline-flex items-center px-6 py-2.5 border border-white/20 text-sm font-bold text-indigo-900 bg-white/90 backdrop-blur-md rounded-full shadow-xl hover:bg-white transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95 group"
+                    >
+                        <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                        Create Post
+                    </button>
+                </div>
             </div>
 
             {analytics && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-300">
-                        <p className="text-sm text-base-content/60 font-medium">Total Posts</p>
-                        <p className="text-2xl font-bold text-base-content mt-1">{analytics.total_posts}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="p-6 rounded-3xl glass-card relative overflow-hidden group">
+                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition-colors"></div>
+                        <p className="text-xs text-base-content/60 font-bold uppercase tracking-widest">Total Posts</p>
+                        <p className="text-4xl font-extrabold text-base-content mt-2 drop-shadow-sm"><CountUpNumber value={analytics.total_posts} /></p>
                     </div>
-                    <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-300">
-                        <p className="text-sm text-base-content/60 font-medium">Scheduled</p>
-                        <p className="text-2xl font-bold text-blue-600 mt-1">{analytics.scheduled_posts}</p>
+                    <div className="p-6 rounded-3xl glass-card relative overflow-hidden group">
+                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition-colors"></div>
+                        <p className="text-xs text-base-content/60 font-bold uppercase tracking-widest">Scheduled</p>
+                        <p className="text-4xl font-extrabold text-blue-600 mt-2 drop-shadow-sm"><CountUpNumber value={analytics.scheduled_posts} /></p>
                     </div>
-                    <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-300">
-                        <p className="text-sm text-base-content/60 font-medium">Completed</p>
-                        <p className="text-2xl font-bold text-emerald-600 mt-1">{analytics.posted_posts}</p>
+                    <div className="p-6 rounded-3xl glass-card relative overflow-hidden group">
+                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-colors"></div>
+                        <p className="text-xs text-base-content/60 font-bold uppercase tracking-widest">Completed</p>
+                        <p className="text-4xl font-extrabold text-emerald-600 mt-2 drop-shadow-sm"><CountUpNumber value={analytics.posted_posts} /></p>
                     </div>
-                    <div className="bg-emerald-50 p-4 rounded-xl shadow-sm border border-emerald-200">
-                        <p className="text-sm text-emerald-800 font-medium">Current Streak 🔥</p>
-                        <p className="text-2xl font-bold text-emerald-600 mt-1">{analytics.current_streak} days</p>
+                    <div className="p-6 rounded-3xl glass-card border-orange-200 bg-gradient-to-br from-orange-50/50 to-pink-50/50 relative overflow-hidden group">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-400/20 rounded-full blur-xl group-hover:bg-orange-400/30 transition-colors"></div>
+                        <p className="text-xs text-orange-700 font-bold uppercase tracking-widest">Current Streak 🔥</p>
+                        <p className="text-4xl font-extrabold text-orange-600 mt-2 drop-shadow-sm"><CountUpNumber value={analytics.current_streak} /> <span className="text-sm font-medium tracking-normal opacity-80">days</span></p>
                     </div>
                 </div>
             )}
 
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-base-300 pb-2">
-                <div className="flex space-x-2">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-base-300 pb-4">
+                <div className="flex space-x-2 bg-base-200/50 p-1 rounded-full backdrop-blur-sm">
                     {['all', 'upcoming', 'completed'].map(f => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`px-4 py-2 rounded-md text-sm font-medium capitalize transition ${filter === f ? 'bg-emerald-100 text-emerald-700' : 'text-base-content/60 hover:text-base-content/80 hover:bg-base-300'
+                            className={`px-5 py-2 rounded-full text-sm font-semibold capitalize transition-all duration-300 ${filter === f ? 'bg-white text-indigo-700 shadow-md transform scale-105' : 'text-base-content/60 hover:text-base-content/80 hover:bg-white/50'
                                 }`}
                         >
                             {f}
                         </button>
                     ))}
                 </div>
-                <div className="flex items-center space-x-2">
-                    <span className="text-sm text-base-content/70">Platform:</span>
-                    <select
-                        value={platformFilter}
-                        onChange={(e) => setPlatformFilter(e.target.value)}
-                        className="rounded-md border-base-content/20 bg-base-100 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border text-base-content"
-                    >
-                        <option value="All">All Categories</option>
-                        <option value="Instagram">Instagram</option>
-                        <option value="LinkedIn">LinkedIn</option>
-                        <option value="X">X</option>
-                        <option value="Facebook">Facebook</option>
-                        <option value="General">General</option>
-                    </select>
+                <div className="flex items-center space-x-3">
+                    <span className="text-sm text-base-content/70 font-semibold tracking-wide">Platform:</span>
+                    <div className="relative">
+                        <select
+                            value={platformFilter}
+                            onChange={(e) => setPlatformFilter(e.target.value)}
+                            className="appearance-none rounded-full border-white/40 bg-white/70 backdrop-blur-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:ring-2 outline-none sm:text-sm pl-4 pr-10 py-2 text-base-content font-medium transition cursor-pointer hover:bg-white"
+                        >
+                            <option value="All">All Categories</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="LinkedIn">LinkedIn</option>
+                            <option value="X">X (Twitter)</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="General">General</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-base-content/50">
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -183,7 +211,7 @@ const Dashboard = () => {
                 {filteredPosts.map((post) => {
                     const pastDue = isPastDue(post);
                     return (
-                        <div key={post.id} className="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden hover:shadow-md transition">
+                        <div key={post.id} className="post-card bg-base-100 rounded-2xl shadow-sm border border-base-300/60 overflow-hidden hover:border-indigo-200 transition-colors">
                             <div className="p-5">
                                 <div className="flex justify-between items-start">
                                     <div className="flex flex-wrap gap-2">
