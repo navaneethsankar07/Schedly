@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-dummy-key-for-dev'
 DEBUG = True
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['https://schedly-urut.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -36,7 +36,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'core.urls'
-
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://schedly-lime.vercel.app/"
+]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
