@@ -5,8 +5,8 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-dummy-key-for-dev'
-DEBUG = True
+SECRET_KEY = os.environ.get("SECRET_KEY")
+DEBUG = False
 ALLOWED_HOSTS = ['https://schedly-urut.onrender.com']
 
 INSTALLED_APPS = [
