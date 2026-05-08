@@ -3,119 +3,46 @@ import { Bot, X, Send, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 
-const PRESET_THEMES = [
-    "Technology",
-    "Fitness",
-    "Business & Marketing",
-    "Lifestyle & Travel",
-    "Comedy & Entertainment",
-    "Education"
-];
+const PRESET_THEMES = ["Technology", "Fitness", "Business & Marketing", "Lifestyle & Travel", "Comedy", "Education"];
 
 const SUGGESTIONS = {
-    "Technology": [
-        "Share a 'Did you know?' about a recent AI development. 🤖",
-        "Post a tutorial solving a common tech problem you faced today. 💻",
-        "Review a tool or software you can't live without. ⚙️"
-    ],
-    "Fitness": [
-        "Share your favorite 15-minute quick workout routine. 🏃‍♂️",
-        "Post a myth-busting fact about nutrition or diets. 🥗",
-        "Share a motivational quote overlaying a gym or outdoor picture. 💪"
-    ],
-    "Business & Marketing": [
-        "Share a key lesson from a business mistake you made. 📈",
-        "Post 3 tips for improving productivity while working remotely. ⚡",
-        "Analyze a brand's recent marketing campaign and why it worked. 🎯"
-    ],
-    "Lifestyle & Travel": [
-        "Share a 'day in the life' photo dump or short video. ☕",
-        "Post your top 3 travel essentials you never leave without. ✈️",
-        "Share a hidden gem coffee shop or spot in your city. 🌆"
-    ],
-    "Comedy & Entertainment": [
-        "Share a funny relatable meme about your industry. 😂",
-        "Post a 'Behind the Scenes' blooper reel or funny mistake. 🎬",
-        "Write a humorous take on a common myth in your niche. 🤡"
-    ],
-    "Education": [
-        "Break down a complex topic into 3 simple bullet points. 📚",
-        "Share a 'How-To' mini-guide or infographic. 🎓",
-        "Recommend 3 books or podcasts that changed your perspective. 📖"
-    ]
+    "Technology": ["Share a 'Did you know?' about a recent AI development. 🤖", "Post a tutorial solving a common tech problem. 💻", "Review a tool you can't live without. ⚙️"],
+    "Fitness": ["Share your favorite 15-minute workout routine. 🏃‍♂️", "Post a myth-busting fact about nutrition. 🥗", "Share a motivational quote. 💪"],
+    "Business & Marketing": ["Share a key lesson from a business mistake. 📈", "Post 3 tips for remote productivity. ⚡", "Analyze a brand's recent campaign. 🎯"],
+    "Lifestyle & Travel": ["Share a 'day in the life' photo dump. ☕", "Post your top 3 travel essentials. ✈️", "Share a hidden gem spot in your city. 🌆"],
+    "Comedy": ["Share a funny relatable meme. 😂", "Post a Behind the Scenes blooper. 🎬", "Write a humorous take on a niche myth. 🤡"],
+    "Education": ["Break down a complex topic into 3 bullet points. 📚", "Share a 'How-To' mini-guide. 🎓", "Recommend 3 books that changed your perspective. 📖"]
 };
 
 const IdeaChatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { id: 1, type: 'bot', text: "Hey! Need content ideas? Tell me what your niche is, or select a theme below." }
+        { id: 1, type: 'bot', text: "Hey! Need content ideas? Tell me your niche or pick a theme below." }
     ]);
     const [inputText, setInputText] = useState("");
-    const [socials, setSocials] = useState([]);
     const messagesEndRef = useRef(null);
 
-    useEffect(() => {
-        // Fetch socials if dashboard allows it, ensuring context-aware chatbot
-        api.get('user/profile/').then(res => {
-            if (res.data?.profile?.connected_platforms) {
-                setSocials(res.data.profile.connected_platforms);
-            }
-        }).catch(() => { });
-    }, []);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+    useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
     const handleSend = (text, isPreset = false) => {
         const userText = text.trim();
         if (!userText) return;
-
-        const newMessages = [...messages, { id: Date.now(), type: 'user', text: userText }];
-        setMessages(newMessages);
+        setMessages(prev => [...prev, { id: Date.now(), type: 'user', text: userText }]);
         if (!isPreset) setInputText("");
 
         setTimeout(() => {
-            const lowerInput = userText.toLowerCase();
+            const lower = userText.toLowerCase();
             let matchedTheme = null;
+            if (lower.includes('tech') || lower.includes('software') || lower.includes('coding')) matchedTheme = "Technology";
+            else if (lower.includes('fit') || lower.includes('health') || lower.includes('gym')) matchedTheme = "Fitness";
+            else if (lower.includes('business') || lower.includes('market') || lower.includes('money')) matchedTheme = "Business & Marketing";
+            else if (lower.includes('life') || lower.includes('travel') || lower.includes('food')) matchedTheme = "Lifestyle & Travel";
+            else if (lower.includes('comedy') || lower.includes('fun') || lower.includes('meme') || lower.includes('joke')) matchedTheme = "Comedy";
+            else if (lower.includes('edu') || lower.includes('learn') || lower.includes('study')) matchedTheme = "Education";
 
-            // Ensure it only answers specific themes
-            if (lowerInput.includes('tech') || lowerInput.includes('software') || lowerInput.includes('coding')) {
-                matchedTheme = "Technology";
-            } else if (lowerInput.includes('fit') || lowerInput.includes('health') || lowerInput.includes('gym')) {
-                matchedTheme = "Fitness";
-            } else if (lowerInput.includes('business') || lowerInput.includes('market') || lowerInput.includes('money')) {
-                matchedTheme = "Business & Marketing";
-            } else if (lowerInput.includes('life') || lowerInput.includes('travel') || lowerInput.includes('food')) {
-                matchedTheme = "Lifestyle & Travel";
-            } else if (lowerInput.includes('comedy') || lowerInput.includes('fun') || lowerInput.includes('meme') || lowerInput.includes('joke')) {
-                matchedTheme = "Comedy & Entertainment";
-            } else if (lowerInput.includes('edu') || lowerInput.includes('learn') || lowerInput.includes('study') || lowerInput.includes('book')) {
-                matchedTheme = "Education";
-            }
-
-            let botReply = "";
-
-            if (matchedTheme) {
-                const ideas = SUGGESTIONS[matchedTheme];
-                const randomIdea = ideas[Math.floor(Math.random() * ideas.length)];
-
-                let platformText = "";
-                if (socials.length > 0) {
-                    const platProps = socials[Math.floor(Math.random() * socials.length)];
-                    const platName = typeof platProps === 'string' ? platProps : platProps.name;
-                    platformText = ` This would be perfect for your connected ${platName} account!`;
-                }
-
-                botReply = `Here's an idea for ${matchedTheme}:\n\n✨ ${randomIdea}${platformText}`;
-            } else {
-                // Strict guard: don't reply to random things
-                botReply = "I am specifically designed to suggest content ideation! Please provide a valid prompt or select one of the suggested themes like Tech, Fitness, Business, or Lifestyle.";
-            }
+            const botReply = matchedTheme
+                ? `Here's an idea for ${matchedTheme}:\n\n✨ ${SUGGESTIONS[matchedTheme][Math.floor(Math.random() * SUGGESTIONS[matchedTheme].length)]}`
+                : "I'm designed for content ideas! Try topics like Tech, Fitness, Business, or Lifestyle.";
 
             setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: botReply }]);
         }, 600);
@@ -129,22 +56,27 @@ const IdeaChatbot = () => {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="fixed bottom-20 right-4 sm:right-8 w-[350px] max-h-[500px] bg-base-100 shadow-2xl rounded-2xl border border-base-300 flex flex-col z-[100] overflow-hidden"
+                        className="fixed bottom-20 right-3 sm:right-8 z-[100] flex flex-col shadow-2xl rounded-2xl border border-c-border bg-c-card overflow-hidden"
+                        style={{ width: 'min(340px, calc(100vw - 24px))', maxHeight: 'min(480px, calc(100vh - 120px))' }}
                     >
-                        <div className="bg-primary text-primary-content p-4 flex justify-between items-center">
+                        {/* Header */}
+                        <div className="bg-c-accent text-white p-3.5 flex justify-between items-center flex-shrink-0">
                             <div className="flex items-center gap-2">
-                                <Bot className="w-6 h-6" />
-                                <span className="font-bold">Content Assistant</span>
+                                <Bot className="w-5 h-5" />
+                                <span className="font-bold text-sm">Content Assistant</span>
                             </div>
-                            <button onClick={() => setIsOpen(false)} className="hover:bg-primary-focus p-1 rounded-md transition">
-                                <X className="w-5 h-5" />
+                            <button onClick={() => setIsOpen(false)} className="hover:opacity-70 p-1 rounded-md transition min-w-[28px] min-h-[28px] flex items-center justify-center">
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 
-                        <div className="flex-1 p-4 overflow-y-auto bg-base-200/50 space-y-4 max-h-[300px]">
+                        {/* Messages */}
+                        <div className="flex-1 p-3.5 overflow-y-auto bg-c-bg/50 space-y-3">
                             {messages.map((msg) => (
                                 <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[80%] p-3 rounded-2xl text-sm whitespace-pre-wrap shadow-sm ${msg.type === 'user' ? 'bg-primary text-primary-content rounded-tr-none' : 'bg-base-100 text-base-content rounded-tl-none border border-base-300'
+                                    <div className={`max-w-[85%] p-3 rounded-2xl text-sm whitespace-pre-wrap shadow-sm ${msg.type === 'user'
+                                        ? 'bg-c-accent text-white rounded-tr-none'
+                                        : 'bg-c-card text-c-text rounded-tl-none border border-c-border'
                                         }`}>
                                         {msg.text}
                                     </div>
@@ -153,30 +85,33 @@ const IdeaChatbot = () => {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        <div className="p-3 bg-base-100 border-t border-base-200 flex flex-nowrap overflow-x-auto gap-2 no-scrollbar">
+                        {/* Preset Pills */}
+                        <div className="p-2.5 bg-c-card border-t border-c-border flex flex-nowrap overflow-x-auto gap-1.5 flex-shrink-0">
                             {PRESET_THEMES.map(theme => (
                                 <button
                                     key={theme}
                                     onClick={() => handleSend(`Give me an idea for ${theme}`, true)}
-                                    className="whitespace-nowrap px-3 py-1.5 bg-base-200 hover:bg-base-300 text-base-content text-xs rounded-full font-medium transition"
+                                    className="whitespace-nowrap px-2.5 py-1.5 bg-c-bg hover:bg-c-border text-c-text text-xs rounded-full font-medium transition min-h-[28px] border border-c-border"
                                 >
                                     {theme}
                                 </button>
                             ))}
                         </div>
 
-                        <div className="p-3 bg-base-100 border-t border-base-200 flex items-center gap-2">
+                        {/* Input */}
+                        <div className="p-2.5 bg-c-card border-t border-c-border flex items-center gap-2 flex-shrink-0">
                             <input
                                 type="text"
                                 value={inputText}
                                 onChange={e => setInputText(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && handleSend(inputText)}
                                 placeholder="Ask for ideas..."
-                                className="flex-1 bg-base-200 text-base-content text-sm rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                className="flex-1 bg-c-bg text-c-text text-sm rounded-full px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-c-accent/50 border border-c-border"
+                                style={{ fontSize: '16px' }}
                             />
                             <button
                                 onClick={() => handleSend(inputText)}
-                                className="bg-primary hover:primary-focus text-primary-content p-2 rounded-full transition shadow-sm"
+                                className="bg-c-accent text-white p-2 rounded-full transition hover:opacity-90 min-w-[36px] min-h-[36px] flex items-center justify-center"
                             >
                                 <Send className="w-4 h-4" />
                             </button>
@@ -189,9 +124,9 @@ const IdeaChatbot = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 bg-primary hover:brightness-110 text-primary-content p-4 rounded-full shadow-xl shadow-primary/30 z-[100] transition"
+                className="fixed bottom-4 right-3 sm:bottom-8 sm:right-8 bg-c-accent text-white p-3.5 sm:p-4 rounded-full shadow-xl z-[100] transition min-w-[52px] min-h-[52px] flex items-center justify-center"
             >
-                {isOpen ? <X className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
+                {isOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />}
             </motion.button>
         </>
     );

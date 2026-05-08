@@ -8,8 +8,11 @@ import CalendarView from './pages/CalendarView';
 import LandingPage from './pages/LandingPage';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
+import WorkflowBoard from './pages/WorkflowBoard';
+import WeeklyReport from './pages/WeeklyReport';
 import Navbar from './components/Navbar';
 import IdeaChatbot from './components/IdeaChatbot';
+import CommandPalette from './components/CommandPalette';
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useContext(AuthContext);
@@ -23,10 +26,11 @@ const AppLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-base-200 text-base-content flex flex-col transition-colors duration-300">
       <Navbar />
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 w-full max-w-7xl mx-auto p-3 sm:p-5 lg:p-8">
         {children}
       </main>
       <IdeaChatbot />
+      <CommandPalette />
     </div>
   );
 };
@@ -43,6 +47,8 @@ const AppRoutes = () => {
       <Route path="/calendar" element={<ProtectedRoute><AppLayout><CalendarView /></AppLayout></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><AppLayout><Profile /></AppLayout></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><AppLayout><Notifications /></AppLayout></ProtectedRoute>} />
+      <Route path="/workflow" element={<ProtectedRoute><AppLayout><WorkflowBoard /></AppLayout></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute><AppLayout><WeeklyReport /></AppLayout></ProtectedRoute>} />
     </Routes>
   );
 };

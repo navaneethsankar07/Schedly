@@ -1,34 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { User, Activity, Edit2, Link as LinkIcon, Check, Plus, Trash2 } from 'lucide-react';
-import { FaXTwitter, FaLinkedin, FaInstagram, FaFacebook } from 'react-icons/fa6';
+import React, { useState, useEffect, useContext } from 'react';
+import { User, Activity, Edit2, Check, AlertTriangle, Key } from 'lucide-react';
 import MascotOrb from "../components/MascotOrb";
 import api from '../services/api';
-
-const AVAILABLE_PLATFORMS = ['X', 'LinkedIn', 'Instagram', 'Facebook'];
-
-const PLATFORM_ICONS = {
-    X: <FaXTwitter className="w-5 h-5 text-neutral-900 dark:text-white" />,
-    LinkedIn: <FaLinkedin className="w-5 h-5 text-[#0A66C2]" />,
-    Instagram: <FaInstagram className="w-5 h-5 text-[#E1306C]" />,
-    Facebook: <FaFacebook className="w-5 h-5 text-[#1877F2]" />
-};
+import { AuthContext } from '../context/AuthContext';
 
 const Profile = () => {
+    const { logout } = useContext(AuthContext);
     const [profile, setProfile] = useState(null);
     const [stats, setStats] = useState({ total: 0, posted: 0, scheduled: 0 });
     const [isEditingName, setIsEditingName] = useState(false);
     const [username, setUsername] = useState('');
 
-    const [platformToAdd, setPlatformToAdd] = useState('');
-    const [platformUrl, setPlatformUrl] = useState('');
-    const [urlError, setUrlError] = useState('');
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordSuccess, setPasswordSuccess] = useState('');
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
     useEffect(() => {
         fetchProfile();
         fetchStats();
+        // eslint-disable-next-line
     }, []);
 
-    const fetchProfile = async () => {
+    async function fetchProfile() {
         try {
             const res = await api.get('user/profile/');
             setProfile(res.data);
@@ -38,7 +35,7 @@ const Profile = () => {
         }
     };
 
-    const fetchStats = async () => {
+    async function fetchStats() {
         try {
             const res = await api.get('posts/');
             const posts = res.data;
@@ -60,56 +57,29 @@ const Profile = () => {
         }
     };
 
-    const validateUrl = (platform, url) => {
-        const lowerUrl = url.toLowerCase();
-        if (!lowerUrl.startsWith('http')) return "URL must start with http:// or https://";
-
-        if (platform === 'X' && !lowerUrl.includes('twitter.com') && !lowerUrl.includes('x.com')) return "Invalid X/Twitter link.";
-        if (platform === 'LinkedIn' && !lowerUrl.includes('linkedin.com')) return "Invalid LinkedIn link.";
-        if (platform === 'Instagram' && !lowerUrl.includes('instagram.com')) return "Invalid Instagram link.";
-        if (platform === 'Facebook' && !lowerUrl.includes('facebook.com')) return "Invalid Facebook link.";
-
-        return "";
-    };
-
-    const handleConnectPlatform = async () => {
-        if (!platformToAdd || !platformUrl) return;
-
-        const errorMsg = validateUrl(platformToAdd, platformUrl);
-        if (errorMsg) {
-            setUrlError(errorMsg);
-            return;
-        }
-        setUrlError('');
-
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        setPasswordError('');
+        setPasswordSuccess('');
         try {
-            // In python/JSON it sits as an array. Might be mixed from older versions (strings vs objects).
-            let currentPlatforms = profile?.profile?.connected_platforms || [];
-
-            // Upgrade migrating old purely-string data
-            currentPlatforms = currentPlatforms.map(p => typeof p === 'string' ? { name: p, url: '' } : p);
-
-            if (currentPlatforms.find(p => p.name === platformToAdd)) return;
-
-            const newPlatforms = [...currentPlatforms, { name: platformToAdd, url: platformUrl }];
-            await api.put('user/profile/', { connected_platforms: newPlatforms });
-
-            setPlatformToAdd('');
-            setPlatformUrl('');
-            fetchProfile();
+            await api.post('auth/change-password/', {
+                old_password: oldPassword,
+                new_password: newPassword
+            });
+            setPasswordSuccess('Password changed successfully!');
+            setOldPassword('');
+            setNewPassword('');
         } catch (err) {
-            console.error(err);
+            setPasswordError(err.response?.data?.error || 'Failed to change password.');
         }
     };
 
-    const handleDisconnectPlatform = async (platName) => {
+    const handleDeleteAccount = async () => {
+        if (deleteConfirmText !== 'DELETE') return;
         try {
-            let currentPlatforms = profile?.profile?.connected_platforms || [];
-            currentPlatforms = currentPlatforms.map(p => typeof p === 'string' ? { name: p, url: '' } : p);
-
-            const newPlatforms = currentPlatforms.filter(p => p.name !== platName);
-            await api.put('user/profile/', { connected_platforms: newPlatforms });
-            fetchProfile();
+            await api.delete('auth/delete-account/');
+            setShowDeleteModal(false);
+            logout(); // clear tokens and redirect
         } catch (err) {
             console.error(err);
         }
@@ -117,146 +87,145 @@ const Profile = () => {
 
     if (!profile) return <div className="p-8 text-center text-base-content/50">Loading profile...</div>;
 
-    let connectedPlatforms = profile.profile?.connected_platforms || [];
-    connectedPlatforms = connectedPlatforms.map(p => typeof p === 'string' ? { name: p, url: 'N/A' } : p);
-    const connectedNames = connectedPlatforms.map(p => p.name);
+    const isPasswordUser = profile.login_method === 'password';
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-fade-in relative">
-            {/* Mascot interaction */}
-            <div className="absolute -right-16 top-0 hidden lg:flex flex-col items-center gap-3">
-                <div className="bg-base-100/90 backdrop-blur border border-base-300 p-3 rounded-2xl shadow-xl text-sm font-semibold text-base-content w-48 text-center relative floating-orb" style={{ animationDelay: '1s' }}>
-                    Keep posting! You're doing great. 🚀
-                    <div className="absolute -bottom-2 right-1/2 w-4 h-4 bg-base-100/90 border-b border-r border-base-300 transform rotate-45"></div>
-                </div>
-                <MascotOrb className="w-20 h-20 floating-orb" expression="think" />
-            </div>
-
-            <div className="bg-base-100 rounded-3xl shadow-xl border border-base-300 overflow-hidden relative">
-                {/* Gradient background header */}
-                <div className="h-32 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
+        <div className="space-y-5 sm:space-y-8 max-w-4xl mx-auto relative z-10 pb-10 sm:pb-12">
+            {/* Top Section - Profile Header */}
+            <div className="bg-c-card rounded-2xl sm:rounded-3xl shadow-sm border border-c-border overflow-hidden relative">
+                <div className="h-24 sm:h-32 w-full bg-c-bg border-b border-c-border relative overflow-hidden">
+                    <div className="absolute inset-0 bg-c-accent/5 mix-blend-overlay"></div>
                 </div>
 
-                <div className="p-8 pt-0 relative">
-                    <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 -mt-12 mb-8">
-                        <div className="w-32 h-32 bg-base-100 rounded-full flex items-center justify-center border-4 border-base-100 shadow-2xl overflow-hidden z-10 p-1 relative group">
-                            <div className="w-full h-full bg-gradient-to-tr from-indigo-100 to-purple-100 rounded-full flex items-center justify-center text-indigo-400 group-hover:scale-105 transition-transform duration-500">
-                                <User className="w-16 h-16" />
+                <div className="p-4 sm:p-8 pt-0 relative bg-c-card">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 -mt-10 sm:-mt-12 mb-5 sm:mb-8">
+                        <div className="w-20 h-20 sm:w-32 sm:h-32 bg-c-card rounded-full flex items-center justify-center border-4 border-c-card shadow-sm overflow-hidden z-10 p-1 relative group flex-shrink-0">
+                            <div className="w-full h-full bg-c-bg rounded-full flex items-center justify-center text-c-accent group-hover:scale-105 transition-transform duration-500">
+                                <User className="w-10 h-10 sm:w-16 sm:h-16" />
                             </div>
                         </div>
-                        <div className="flex-1 text-center sm:text-left mb-2">
-                            <h1 className="text-3xl font-extrabold text-base-content flex flex-wrap justify-center sm:justify-start items-center gap-3 tracking-tight">
+                        <div className="text-center sm:text-left flex-1 pb-1 sm:pb-2 min-w-0">
+                            <h1 className="text-xl sm:text-3xl font-black text-c-text tracking-tight flex items-center justify-center sm:justify-start gap-2 mb-1 flex-wrap">
                                 {isEditingName ? (
                                     <div className="flex items-center gap-2">
                                         <input
                                             type="text"
                                             value={username}
                                             onChange={e => setUsername(e.target.value)}
-                                            className="input input-sm border-indigo-200 bg-white shadow-inner focus:ring-2 focus:ring-indigo-500 rounded-lg font-bold"
+                                            className="input input-sm border-c-border bg-c-bg shadow-inner focus:ring-2 focus:ring-c-accent rounded-lg font-bold text-c-text"
+                                            style={{ fontSize: '16px' }}
                                         />
-                                        <button onClick={handleUpdateName} className="btn btn-sm btn-circle bg-indigo-600 text-white hover:bg-indigo-700 border-none shadow-md"><Check className="w-4 h-4" /></button>
+                                        <button onClick={handleUpdateName} className="btn btn-sm btn-circle bg-c-accent text-white hover:opacity-90 border-none shadow-sm min-w-[36px] min-h-[36px]"><Check className="w-4 h-4" /></button>
                                     </div>
                                 ) : (
                                     <>
-                                        {profile.username}
-                                        <button onClick={() => setIsEditingName(true)} className="btn btn-xs btn-circle btn-ghost text-base-content/40 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"><Edit2 className="w-4 h-4" /></button>
+                                        <span className="break-all">{profile.username}</span>
+                                        <button onClick={() => setIsEditingName(true)} className="btn btn-xs btn-circle btn-ghost text-c-muted hover:text-c-accent hover:bg-c-bg transition-colors min-w-[28px] min-h-[28px]"><Edit2 className="w-3.5 h-3.5" /></button>
                                     </>
                                 )}
                             </h1>
-                            <p className="text-base-content/60 font-medium tracking-wide">{profile.email}</p>
+                            <p className="text-c-muted font-medium tracking-wide text-xs sm:text-sm break-all">{profile.email} &bull; {isPasswordUser ? 'Password Account' : 'Google Account'}</p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-6 pt-6 border-t border-base-200">
-                        <div className="text-center p-6 bg-gradient-to-br from-indigo-50 to-white rounded-2xl border border-indigo-100/50 shadow-sm glass-card">
-                            <span className="block text-4xl font-extrabold text-indigo-600 mb-2">{stats.total}</span>
-                            <span className="text-xs uppercase tracking-widest font-bold text-indigo-400 flex items-center justify-center gap-1.5"><Activity className="w-4 h-4" /> Total Posts</span>
+                    <div className="grid grid-cols-3 gap-2 sm:gap-6 pt-4 sm:pt-6 border-t border-c-border bg-c-card">
+                        <div className="text-center p-3 sm:p-6 bg-c-card rounded-xl sm:rounded-2xl border border-c-border shadow-sm transition-all hover:-translate-y-1">
+                            <span className="block text-2xl sm:text-4xl font-extrabold text-c-text mb-1">{stats.total}</span>
+                            <span className="text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-widest font-bold text-c-muted flex items-center justify-center gap-1"><Activity className="w-3 h-3 sm:w-4 sm:h-4" /><span className="hidden xs:inline">Total</span> Posts</span>
                         </div>
-                        <div className="text-center p-6 bg-gradient-to-br from-emerald-50 to-white rounded-2xl border border-emerald-100/50 shadow-sm glass-card">
-                            <span className="block text-4xl font-extrabold text-emerald-500 mb-2">{stats.posted}</span>
-                            <span className="text-xs uppercase tracking-widest font-bold text-emerald-600/70">Published</span>
+                        <div className="text-center p-3 sm:p-6 bg-c-card rounded-xl sm:rounded-2xl border border-c-border shadow-sm transition-all hover:-translate-y-1">
+                            <span className="block text-2xl sm:text-4xl font-extrabold text-c-text mb-1">{stats.posted}</span>
+                            <span className="text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-widest font-bold text-c-muted">Published</span>
                         </div>
-                        <div className="text-center p-6 bg-gradient-to-br from-amber-50 to-white rounded-2xl border border-amber-100/50 shadow-sm glass-card">
-                            <span className="block text-4xl font-extrabold text-amber-500 mb-2">{stats.scheduled}</span>
-                            <span className="text-xs uppercase tracking-widest font-bold text-amber-600/70">Remaining</span>
+                        <div className="text-center p-3 sm:p-6 bg-c-card rounded-xl sm:rounded-2xl border border-c-border shadow-sm transition-all hover:-translate-y-1">
+                            <span className="block text-2xl sm:text-4xl font-extrabold text-c-text mb-1">{stats.scheduled}</span>
+                            <span className="text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-widest font-bold text-c-muted">Remaining</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-base-100 rounded-3xl shadow-xl border border-base-300 p-8">
-                <h2 className="text-2xl font-extrabold text-base-content mb-8 flex items-center gap-3">
-                    <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
-                        <LinkIcon className="w-6 h-6" />
-                    </div>
-                    Social Integrations
-                </h2>
-
-                <div className="mb-8 p-6 bg-base-200 border border-base-300 shadow-sm rounded-2xl space-y-4 relative overflow-hidden">
-                    <div className="absolute right-0 top-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl opacity-50"></div>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative z-10 justify-between">
-                        <div className="flex gap-4 w-full">
-                            <select
-                                value={platformToAdd}
-                                onChange={e => setPlatformToAdd(e.target.value)}
-                                className="select select-bordered w-full sm:w-1/3 rounded-xl font-medium"
-                            >
-                                <option value="">Select platform...</option>
-                                {AVAILABLE_PLATFORMS.filter(p => !connectedNames.includes(p)).map(p => (
-                                    <option key={p} value={p}>{p}</option>
-                                ))}
-                            </select>
-                            <input
-                                type="text"
-                                placeholder={`e.g. https://${platformToAdd ? platformToAdd.toLowerCase() : 'example'}.com/yourprofile`}
-                                value={platformUrl}
-                                onChange={e => {
-                                    setPlatformUrl(e.target.value);
-                                    setUrlError('');
-                                }}
-                                className="input input-bordered flex-1 w-full rounded-xl"
-                                disabled={!platformToAdd}
-                            />
+            {/* Change Password Section */}
+            {isPasswordUser && (
+                <div className="bg-c-card rounded-2xl sm:rounded-3xl shadow-sm border border-c-border p-5 sm:p-8">
+                    <h2 className="text-lg sm:text-2xl font-extrabold text-c-text mb-4 sm:mb-6 flex items-center gap-3">
+                        <div className="p-2 bg-c-accent/10 text-c-accent rounded-xl">
+                            <Key className="w-5 h-5" />
                         </div>
-                        <button onClick={handleConnectPlatform} disabled={!platformToAdd || !platformUrl} className="btn bg-indigo-600 hover:bg-indigo-700 text-white w-full sm:w-auto rounded-xl border-none shadow-lg shadow-indigo-200 hover:scale-[1.02] active:scale-95 transition-all">
-                            <Plus className="w-5 h-5 mr-1" />
-                            Connect
+                        Change Password
+                    </h2>
+
+                    <form onSubmit={handleChangePassword} className="space-y-4 max-w-sm">
+                        {passwordError && <div className="text-red-500 text-sm font-semibold bg-red-50 px-3 py-2 rounded-lg">{passwordError}</div>}
+                        {passwordSuccess && <div className="text-green-600 text-sm font-semibold bg-green-50 px-3 py-2 rounded-lg">{passwordSuccess}</div>}
+                        <div>
+                            <label className="block text-sm font-medium text-c-muted mb-1.5">Current Password</label>
+                            <input type="password" className="input input-bordered w-full rounded-xl" style={{ fontSize: '16px' }} value={oldPassword} onChange={e => setOldPassword(e.target.value)} required />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-c-muted mb-1.5">New Password</label>
+                            <input type="password" className="input input-bordered w-full rounded-xl" style={{ fontSize: '16px' }} value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength="8" />
+                        </div>
+                        <button type="submit" className="btn bg-c-accent hover:opacity-90 text-white rounded-xl border-none shadow-sm w-full sm:w-auto min-h-[44px]">
+                            Update Password
                         </button>
-                    </div>
-                    {urlError && <p className="text-sm font-bold text-error absolute -bottom-6 left-2">{urlError}</p>}
+                    </form>
                 </div>
+            )}
 
-                <div className="space-y-4 mt-8">
-                    {connectedPlatforms.length === 0 ? (
-                        <div className="text-center p-12 bg-base-200 rounded-2xl border-2 border-dashed border-base-300 text-base-content/50 font-medium">
-                            No social accounts connected yet.
-                        </div>
-                    ) : (
-                        connectedPlatforms.map(plat => (
-                            <div key={plat.name} className="flex items-center justify-between p-5 border border-base-300 bg-base-200 rounded-2xl hover:border-indigo-300 hover:shadow-md transition-all group">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-12 h-12 rounded-xl bg-base-100 flex items-center justify-center text-primary border border-base-300 group-hover:scale-110 transition-transform">
-                                        {PLATFORM_ICONS[plat.name] || <LinkIcon className="w-6 h-6" />}
-                                    </div>
-                                    <div>
-                                        <span className="font-extrabold text-base-content flex items-center gap-3 text-lg">
-                                            {plat.name}
-                                            <span className="badge bg-emerald-100 text-emerald-700 border-none badge-sm font-bold px-2 py-3 rounded-md">Connected</span>
-                                        </span>
-                                        <a href={plat.url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline font-medium block max-w-[200px] sm:max-w-xs truncate">
-                                            {plat.url}
-                                        </a>
-                                    </div>
-                                </div>
-                                <button onClick={() => handleDisconnectPlatform(plat.name)} className="btn btn-ghost btn-circle text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors">
-                                    <Trash2 className="w-5 h-5" />
-                                </button>
-                            </div>
-                        ))
-                    )}
+            {/* Danger Zone */}
+            <div className="bg-c-card rounded-2xl sm:rounded-3xl shadow-sm border-2 border-red-300 p-5 sm:p-8 relative overflow-hidden">
+                <div className="absolute right-0 top-0 w-40 h-40 bg-red-50 rounded-full blur-3xl pointer-events-none opacity-60"></div>
+                <h2 className="text-lg sm:text-2xl font-extrabold text-red-600 mb-3 sm:mb-4 flex items-center gap-3">
+                    <div className="p-2 bg-red-100 text-red-600 rounded-xl">
+                        <AlertTriangle className="w-5 h-5" />
+                    </div>
+                    Danger Zone
+                </h2>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <p className="font-bold text-c-text text-sm">Delete your account permanently</p>
+                        <p className="text-xs text-c-muted mt-0.5">This action cannot be undone. All your posts and data will be lost.</p>
+                    </div>
+                    <button
+                        onClick={() => setShowDeleteModal(true)}
+                        className="w-full sm:w-auto btn btn-outline btn-error rounded-xl font-bold min-h-[44px]"
+                    >
+                        Delete Account
+                    </button>
                 </div>
             </div>
+
+            {/* Delete Account Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}>
+                    <div className="w-full max-w-sm bg-c-card sm:rounded-3xl rounded-t-3xl shadow-2xl border border-red-300 p-6 relative" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-xl font-black text-red-600 mb-2">Delete Account</h3>
+                        <p className="text-c-muted text-sm mb-4">
+                            Type <span className="font-bold text-red-600">DELETE</span> below to confirm.
+                        </p>
+                        <input
+                            type="text"
+                            placeholder="DELETE"
+                            className="input input-bordered w-full mb-4 border-red-300 focus:border-red-500"
+                            style={{ fontSize: '16px' }}
+                            value={deleteConfirmText}
+                            onChange={e => setDeleteConfirmText(e.target.value)}
+                        />
+                        <div className="flex justify-end gap-3">
+                            <button className="btn btn-ghost rounded-xl" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+                            <button
+                                className="btn btn-error text-white rounded-xl min-h-[44px]"
+                                disabled={deleteConfirmText !== 'DELETE'}
+                                onClick={handleDeleteAccount}
+                            >
+                                Confirm Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

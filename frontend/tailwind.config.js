@@ -7,18 +7,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Semantic tokens — map to CSS variables set per-theme
-        "c-bg":       "var(--c-bg)",
-        "c-card":     "var(--c-card)",
-        "c-border":   "var(--c-border)",
-        "c-text":     "var(--c-text)",
-        "c-muted":    "var(--c-muted)",
-        "c-accent":   "var(--c-accent)",
+        "c-bg":       "rgb(var(--c-bg) / <alpha-value>)",
+        "c-card":     "rgb(var(--c-card) / <alpha-value>)",
+        "c-border":   "rgb(var(--c-border) / <alpha-value>)",
+        "c-text":     "rgb(var(--c-text) / <alpha-value>)",
+        "c-muted":    "rgb(var(--c-muted) / <alpha-value>)",
+        "c-accent":   "rgb(var(--c-accent) / <alpha-value>)",
       },
     },
   },
   plugins: [require("daisyui")],
   daisyui: {
-    themes: ["light", "dark", "cupcake", "synthwave", "dracula", "luxury"],
+    themes: ["light", "dark"],
   },
 }
