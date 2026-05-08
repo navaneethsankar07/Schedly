@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Post, Profile, Notification, Template
+from .models import Post, Profile, Notification, Template, Goal
 from django.utils import timezone
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -10,10 +10,14 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(read_only=True)
+    login_method = serializers.SerializerMethodField()
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'profile')
+        fields = ('id', 'username', 'email', 'profile', 'login_method')
+
+    def get_login_method(self, obj):
+        return 'password' if obj.has_usable_password() else 'google'
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -74,3 +78,30 @@ class TemplateSerializer(serializers.ModelSerializer):
         model = Template
         fields = ['id', 'title', 'content', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+class GoalSerializer(serializers.ModelSerializer):
+    progress_count = serializers.SerializerMethodField()
+    progress_pct = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Goal
+        fields = ['id', 'target_posts', 'timeframe', 'created_at', 'progress_count', 'progress_pct']
+        read_only_fields = ['id', 'created_at']
+
+    def _get_window_start(self, timeframe):
+        from django.utils import timezone
+        from datetime import timedelta
+        now = timezone.now()
+        if timeframe == 'weekly':
+            return now - timedelta(days=7)
+        return now - timedelta(days=30)
+
+    def get_progress_count(self, obj):
+        start = self._get_window_start(obj.timeframe)
+        return obj.user.posts.filter(status='posted', updated_at__gte=start).count()
+
+    def get_progress_pct(self, obj):
+        count = self.get_progress_count(obj)
+        if obj.target_posts == 0:
+            return 0
+        return min(round((count / obj.target_posts) * 100), 100)

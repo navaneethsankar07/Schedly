@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Calendar, LayoutDashboard, Share2, Sparkles, CheckCircle, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-
 import MascotOrb from '../components/MascotOrb';
+import SchedlyLogo from '../components/SchedlyLogo';
 
 const LandingPage = () => {
     const { user } = useContext(AuthContext);
@@ -26,9 +26,9 @@ const LandingPage = () => {
         <div className="min-h-screen flex flex-col font-sans transition-colors duration-300 relative bg-[#09090b] overflow-hidden text-neutral-100">
             {/* Ambient Animated Particles Background for Landing Room */}
             <div className="absolute inset-0 z-0">
-                <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-indigo-600/30 rounded-full blur-[120px] mix-blend-screen animate-pulse"></div>
+                <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse"></div>
                 <div className="absolute top-[40%] right-[5%] w-[400px] h-[400px] bg-cyan-600/20 rounded-full blur-[100px] mix-blend-screen float-slow"></div>
-                <div className="absolute bottom-[-10%] left-[30%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] mix-blend-screen float-delayed"></div>
+                <div className="absolute bottom-[-10%] left-[30%] w-[600px] h-[600px] bg-teal-600/20 rounded-full blur-[120px] mix-blend-screen float-delayed"></div>
 
                 {/* Floating SVGs */}
                 <Sparkles className="absolute top-1/4 left-1/4 text-white/10 w-12 h-12 floating-orb" />
@@ -40,20 +40,15 @@ const LandingPage = () => {
             <nav className="backdrop-blur-md sticky top-0 z-50 border-b border-white/10 bg-black/20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center gap-2">
-                            <div className="bg-gradient-to-tr from-indigo-500 to-cyan-400 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/20">
-                                <Share2 className="w-5 h-5" />
-                            </div>
-                            <span className="text-xl font-extrabold tracking-tight text-white">
-                                Scheduler
-                            </span>
+                        <div className="flex items-center">
+                            <SchedlyLogo size="md" className="text-white" />
                         </div>
 
                         <div className="flex items-center space-x-4">
                             {user ? (
                                 <Link
                                     to="/dashboard"
-                                    className="btn border-0 text-white rounded-full px-6 shadow-xl shadow-indigo-500/20 bg-gradient-to-r from-indigo-600 to-purple-600 hover:scale-105 transition-transform font-bold"
+                                    className="btn border-0 text-white rounded-full px-6 shadow-xl shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-500 hover:scale-105 transition-all font-bold"
                                 >
                                     Dashboard
                                 </Link>
@@ -64,7 +59,7 @@ const LandingPage = () => {
                                     </Link>
                                     <Link
                                         to="/register"
-                                        className="btn border-0 text-white rounded-full px-6 shadow-xl shadow-indigo-500/20 bg-gradient-to-r from-indigo-600 to-purple-600 hover:scale-105 transition-transform font-bold"
+                                        className="btn border-0 text-white rounded-full px-6 shadow-xl shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-500 hover:scale-105 transition-all font-bold"
                                     >
                                         Get Started Free
                                     </Link>
@@ -85,13 +80,13 @@ const LandingPage = () => {
                             transition={{ duration: 0.8, ease: "easeOut" }}
                             className="max-w-2xl"
                         >
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-indigo-300 text-sm font-semibold mb-8 shadow-inner backdrop-blur-sm">
-                                <Sparkles className="w-4 h-4 text-cyan-400" />
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-emerald-300 text-sm font-semibold mb-8 shadow-inner backdrop-blur-sm">
+                                <Sparkles className="w-4 h-4 text-emerald-400" />
                                 <span>Say hello to your intelligent assistant</span>
                             </div>
                             <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-tight mb-6">
                                 Plan smarter.<br />
-                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 neon-text-glow">Post better.</span>
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 neon-text-glow">Post better.</span>
                             </h1>
                             <p className="text-lg md:text-xl text-neutral-300 mb-10 leading-relaxed max-w-lg font-medium">
                                 Plan, organize, and track your content in one beautiful space. Let Nova handle your schedule while you build your audience.
@@ -100,7 +95,7 @@ const LandingPage = () => {
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <Link
                                     to={user ? "/dashboard" : "/register"}
-                                    className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-full text-white shadow-[0_0_20px_rgba(79,70,229,0.3)] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 hover:scale-[1.02] transition-all"
+                                    className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-full text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] bg-emerald-600 hover:bg-emerald-500 hover:scale-[1.02] transition-all"
                                 >
                                     Start Scheduling
                                     <ChevronRight className="w-5 h-5 ml-1" />
@@ -122,8 +117,8 @@ const LandingPage = () => {
                             className="relative flex justify-center items-center h-[500px]"
                         >
                             {/* Floating elements behind mascot */}
-                            <div className="absolute top-[20%] left-[10%] w-16 h-16 bg-gradient-to-tr from-cyan-400 to-blue-500 rounded-2xl rotate-12 floating-orb opacity-60 blur-[1px]"></div>
-                            <div className="absolute bottom-[20%] right-[10%] w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full float-delayed opacity-50 blur-[2px]"></div>
+                            <div className="absolute top-[20%] left-[10%] w-16 h-16 bg-gradient-to-tr from-cyan-400 to-emerald-500 rounded-2xl rotate-12 floating-orb opacity-60 blur-[1px]"></div>
+                            <div className="absolute bottom-[20%] right-[10%] w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full float-delayed opacity-50 blur-[2px]"></div>
 
                             {/* Main Mascot */}
                             <div className="relative z-10 floating-orb">
@@ -175,14 +170,14 @@ const LandingPage = () => {
                                     desc: "Create and track all your scheduled posts in one intuitive interface. Filter between upcoming and completed posts effortlessly.",
                                 },
                                 {
-                                    icon: <Calendar className="w-7 h-7 text-purple-400" />,
-                                    color: "from-purple-500/20 to-indigo-500/10 border-purple-500/20",
+                                    icon: <Calendar className="w-7 h-7 text-emerald-400" />,
+                                    color: "from-emerald-500/20 to-teal-500/10 border-emerald-500/20",
                                     title: "Visual Calendar",
                                     desc: "Get a bird's-eye view of your entire month. Spot content gaps and maintain consistency with our drag-and-drop calendar.",
                                 },
                                 {
-                                    icon: <CheckCircle className="w-7 h-7 text-emerald-400" />,
-                                    color: "from-emerald-500/20 to-teal-500/10 border-emerald-500/20",
+                                    icon: <CheckCircle className="w-7 h-7 text-teal-400" />,
+                                    color: "from-teal-500/20 to-cyan-500/10 border-teal-500/20",
                                     title: "AI Caption Assist",
                                     desc: "Let Nova's smart caption engine enhance your copy — auto-add hashtags, emojis, and formatting for each platform.",
                                 }
@@ -207,11 +202,8 @@ const LandingPage = () => {
             {/* Footer */}
             <footer className="border-t border-white/10 py-12 z-10 relative">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <div className="flex justify-center items-center gap-3 mb-4">
-                        <div className="p-2 bg-gradient-to-tr from-indigo-500 to-cyan-400 rounded-xl shadow-lg">
-                            <Share2 className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="text-2xl font-extrabold tracking-tight text-white">Scheduler</span>
+                    <div className="flex justify-center items-center mb-4">
+                        <SchedlyLogo size="lg" className="text-white" />
                     </div>
                     <p className="text-neutral-500 text-sm font-medium">© 2026 Social Media Scheduler — Built for creators, by creators.</p>
                 </div>

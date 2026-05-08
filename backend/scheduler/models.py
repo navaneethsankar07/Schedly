@@ -27,6 +27,13 @@ class Post(models.Model):
         ('Instagram', 'Instagram'),
         ('Facebook', 'Facebook'),
     )
+    WORKFLOW_CHOICES = (
+        ('ideas', 'Ideas'),
+        ('drafting', 'Drafting'),
+        ('ready', 'Ready'),
+        ('scheduled', 'Scheduled'),
+        ('posted', 'Posted'),
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField()
     platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES, default='General')
@@ -34,6 +41,7 @@ class Post(models.Model):
     image = models.ImageField(upload_to='posts/', null=True, blank=True)
     scheduled_time = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
+    workflow_stage = models.CharField(max_length=20, choices=WORKFLOW_CHOICES, default='ideas')
     notified_24h = models.BooleanField(default=False)
     notified_due = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -62,3 +70,19 @@ class Template(models.Model):
 
     def __str__(self):
         return self.title
+
+class Goal(models.Model):
+    TIMEFRAME_CHOICES = (
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='goals')
+    target_posts = models.PositiveIntegerField(default=5)
+    timeframe = models.CharField(max_length=10, choices=TIMEFRAME_CHOICES, default='weekly')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.timeframe} goal: {self.target_posts}"

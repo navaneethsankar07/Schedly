@@ -45,7 +45,7 @@ def _build_24h_html(username, scheduled_str, platform, preview, truncated):
                         <!-- Header -->
                         <tr>
                             <td style="background-color:#0f172a; padding: 30px 40px; text-align:center;">
-                                <h1 style="color:#ffffff; margin:0; font-size:24px; font-weight:600; letter-spacing:0.5px;">Scheduler App</h1>
+                                <h1 style="color:#ffffff; margin:0; font-size:24px; font-weight:600; letter-spacing:0.5px;">Schedly App</h1>
                             </td>
                         </tr>
                         
@@ -95,7 +95,7 @@ def _build_24h_html(username, scheduled_str, platform, preview, truncated):
                         <!-- Footer -->
                         <tr>
                             <td style="background-color:#f8fafc; padding: 24px 40px; text-align:center; border-top: 1px solid #e2e8f0;">
-                                <p style="color:#94a3b8; font-size:13px; margin:0;">You are receiving this because you scheduled a post via Scheduler App.</p>
+                                <p style="color:#94a3b8; font-size:13px; margin:0;">You are receiving this because you scheduled a post via Schedly App.</p>
                             </td>
                         </tr>
                         
@@ -170,7 +170,7 @@ def _build_due_html(username, scheduled_str, platform, content):
                         <!-- Footer -->
                         <tr>
                             <td style="background-color:#f8fafc; padding: 24px 40px; text-align:center; border-top: 1px solid #e2e8f0;">
-                                <p style="color:#94a3b8; font-size:13px; margin:0;">You are receiving this because you scheduled a post via Scheduler App.</p>
+                                <p style="color:#94a3b8; font-size:13px; margin:0;">You are receiving this because you scheduled a post via Schedly.</p>
                             </td>
                         </tr>
                         
@@ -230,8 +230,8 @@ def check_notifications():
                 "Scheduled for: " + scheduled_str + "\n"
                 "Platform: " + post.platform + "\n"
                 "Preview: \"" + preview + ("..." if truncated else "") + "\"\n\n"
-                "Log in to your scheduler dashboard to review or update your post.\n\n"
-                "-- Scheduler App"
+                "Log in to your Schedly dashboard to review or update your post.\n\n"
+                "-- Schedly App"
             )
 
             try:
@@ -287,7 +287,7 @@ def check_notifications():
                 "Platform: " + post.platform + "\n"
                 "Content:\n\"" + post.content + "\"\n\n"
                 "Log in to your dashboard and mark it as posted.\n\n"
-                "-- Scheduler App"
+                "-- Schedly App"
             )
 
             try:
@@ -312,4 +312,4 @@ def start():
         scheduler = BackgroundScheduler()
         scheduler.add_job(check_notifications, 'interval', seconds=60)
         scheduler.start()
-        print("[Scheduler] Background job started - checking every 60 seconds.")
+        print("[Schedly] Background job started - checking every 60 seconds.")

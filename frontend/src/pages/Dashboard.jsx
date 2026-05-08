@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import CountUpNumber from '../components/CountUpNumber';
 import TutorialOverlay from '../components/TutorialOverlay';
 import MascotOrb from '../components/MascotOrb';
+import GoalSection from '../components/GoalSection';
 
 const PLATFORM_ICONS = {
     X: <FaXTwitter className="w-3.5 h-3.5 flex-shrink-0 text-neutral-900 dark:text-white" />,
@@ -52,9 +53,7 @@ const Dashboard = () => {
     });
 
     const deleteMutation = useMutation({
-        mutationFn: async (id) => {
-            await api.delete(`posts/${id}/`);
-        },
+        mutationFn: async (id) => { await api.delete(`posts/${id}/`); },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['posts'] });
             queryClient.invalidateQueries({ queryKey: ['analytics'] });
@@ -76,9 +75,7 @@ const Dashboard = () => {
     });
 
     const markPostedMutation = useMutation({
-        mutationFn: async (id) => {
-            await api.patch(`posts/${id}/mark-posted/`);
-        },
+        mutationFn: async (id) => { await api.patch(`posts/${id}/mark-posted/`); },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['posts'] });
             queryClient.invalidateQueries({ queryKey: ['analytics'] });
@@ -86,18 +83,10 @@ const Dashboard = () => {
     });
 
     const handleDelete = (id) => {
-        if (window.confirm("Are you sure?")) {
-            deleteMutation.mutate(id);
-        }
+        if (window.confirm("Are you sure?")) deleteMutation.mutate(id);
     };
 
-    const markPosted = (id) => {
-        markPostedMutation.mutate(id);
-    };
-
-    // A post is "past due" if its scheduled_time is in the past
     const isPastDue = (post) => {
-        // Use the serializer-provided field if available, else compute it
         if (typeof post.is_past_due === 'boolean') return post.is_past_due;
         return new Date(post.scheduled_time) <= new Date();
     };
@@ -109,27 +98,24 @@ const Dashboard = () => {
     }).sort((a, b) => new Date(a.scheduled_time) - new Date(b.scheduled_time));
 
     return (
-        <div className="space-y-8 relative">
+        <div className="space-y-5 sm:space-y-7 relative">
             <TutorialOverlay />
 
-            {/* Gradient Header */}
-            <div className="relative bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-2xl p-8 overflow-hidden shadow-lg border border-white/20">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl transform -translate-y-1/2 translate-x-1/3 float-slow pointer-events-none"></div>
-                <div className="absolute bottom-0 left-10 w-40 h-40 bg-pink-500/20 rounded-full blur-2xl transform translate-y-1/2 -translate-x-1/2 float-delayed pointer-events-none"></div>
-
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative z-10 w-full text-white">
-                    <div className="flex items-center gap-6">
+            {/* Header */}
+            <div className="relative bg-c-card rounded-2xl p-4 sm:p-6 lg:p-8 overflow-hidden shadow-sm border border-c-border">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
+                    <div className="flex items-center gap-4">
                         <div className="hidden md:block">
-                            <MascotOrb className="w-16 h-16 drop-shadow-md" expression="smile" />
+                            <MascotOrb className="w-14 h-14 lg:w-16 lg:h-16 drop-shadow-sm" expression="smile" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-sm">Your Workspace</h1>
-                            <p className="text-white/80 font-medium mt-1">Let's plan your next big moment.</p>
+                            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-c-text">Your Workspace</h1>
+                            <p className="text-sm text-c-muted font-medium mt-0.5">Let's plan your next big moment.</p>
                         </div>
                     </div>
                     <button
                         onClick={() => { setPostToEdit(null); setPrefillContent(''); setIsFormOpen(true); }}
-                        className="inline-flex items-center px-6 py-2.5 border border-white/20 text-sm font-bold text-indigo-900 bg-white/90 backdrop-blur-md rounded-full shadow-xl hover:bg-white transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95 group"
+                        className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 text-sm font-bold text-white bg-c-accent rounded-full shadow-sm hover:opacity-90 transition-all hover:-translate-y-[1px] active:scale-95 group"
                     >
                         <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
                         Create Post
@@ -137,125 +123,128 @@ const Dashboard = () => {
                 </div>
             </div>
 
+            {/* Analytics Cards */}
             {analytics && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div className="p-6 rounded-3xl glass-card relative overflow-hidden group">
-                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition-colors"></div>
-                        <p className="text-xs text-base-content/60 font-bold uppercase tracking-widest">Total Posts</p>
-                        <p className="text-4xl font-extrabold text-base-content mt-2 drop-shadow-sm"><CountUpNumber value={analytics.total_posts} /></p>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+                    <div className="p-4 sm:p-6 rounded-2xl bg-c-card border-t-4 border-t-c-accent border-l border-r border-b border-c-border shadow-sm flex flex-col justify-between">
+                        <p className="text-xs text-c-muted font-bold uppercase tracking-wider">Total Posts</p>
+                        <p className="text-2xl sm:text-3xl font-extrabold text-c-text mt-2"><CountUpNumber value={analytics.total_posts} /></p>
                     </div>
-                    <div className="p-6 rounded-3xl glass-card relative overflow-hidden group">
-                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition-colors"></div>
-                        <p className="text-xs text-base-content/60 font-bold uppercase tracking-widest">Scheduled</p>
-                        <p className="text-4xl font-extrabold text-blue-600 mt-2 drop-shadow-sm"><CountUpNumber value={analytics.scheduled_posts} /></p>
+                    <div className="p-4 sm:p-6 rounded-2xl bg-c-card border border-c-border shadow-sm flex flex-col justify-between">
+                        <p className="text-xs text-c-muted font-bold uppercase tracking-wider">Scheduled</p>
+                        <p className="text-2xl sm:text-3xl font-extrabold text-c-text mt-2"><CountUpNumber value={analytics.scheduled_posts} /></p>
                     </div>
-                    <div className="p-6 rounded-3xl glass-card relative overflow-hidden group">
-                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-colors"></div>
-                        <p className="text-xs text-base-content/60 font-bold uppercase tracking-widest">Completed</p>
-                        <p className="text-4xl font-extrabold text-emerald-600 mt-2 drop-shadow-sm"><CountUpNumber value={analytics.posted_posts} /></p>
+                    <div className="p-4 sm:p-6 rounded-2xl bg-c-card border border-c-border shadow-sm flex flex-col justify-between">
+                        <p className="text-xs text-c-muted font-bold uppercase tracking-wider">Completed</p>
+                        <p className="text-2xl sm:text-3xl font-extrabold text-c-text mt-2"><CountUpNumber value={analytics.posted_posts} /></p>
                     </div>
-                    <div className="p-6 rounded-3xl glass-card border-orange-200 bg-gradient-to-br from-orange-50/50 to-pink-50/50 relative overflow-hidden group">
-                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-400/20 rounded-full blur-xl group-hover:bg-orange-400/30 transition-colors"></div>
-                        <p className="text-xs text-orange-700 font-bold uppercase tracking-widest">Current Streak 🔥</p>
-                        <p className="text-4xl font-extrabold text-orange-600 mt-2 drop-shadow-sm"><CountUpNumber value={analytics.current_streak} /> <span className="text-sm font-medium tracking-normal opacity-80">days</span></p>
+                    <div className="p-4 sm:p-6 rounded-2xl bg-c-card border border-c-border shadow-sm flex flex-col justify-between">
+                        <p className="text-xs text-c-muted font-bold uppercase tracking-wider">Streak 🔥</p>
+                        <p className="text-2xl sm:text-3xl font-extrabold text-c-text mt-2">
+                            <CountUpNumber value={analytics.current_streak} />
+                            <span className="text-xs sm:text-sm font-medium tracking-normal opacity-70 ml-1">days</span>
+                        </p>
                     </div>
                 </div>
             )}
 
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-base-300 pb-4">
-                <div className="flex space-x-2 bg-base-200/50 p-1 rounded-full backdrop-blur-sm">
+            {/* Goals */}
+            <GoalSection />
+
+            {/* Filter Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-c-border pb-4">
+                <div className="flex space-x-1 bg-c-bg p-1 rounded-full border border-c-border w-full sm:w-auto">
                     {['all', 'upcoming', 'completed'].map(f => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`px-5 py-2 rounded-full text-sm font-semibold capitalize transition-all duration-300 ${filter === f ? 'bg-white text-indigo-700 shadow-md transform scale-105' : 'text-base-content/60 hover:text-base-content/80 hover:bg-white/50'
+                            className={`flex-1 sm:flex-none px-3 sm:px-5 py-1.5 rounded-full text-xs sm:text-sm font-semibold capitalize transition-all duration-300 ${filter === f
+                                ? 'bg-c-card text-c-text shadow-sm border border-c-border'
+                                : 'text-c-muted hover:text-c-text'
                                 }`}
                         >
                             {f}
                         </button>
                     ))}
                 </div>
-                <div className="flex items-center space-x-3">
-                    <span className="text-sm text-base-content/70 font-semibold tracking-wide">Platform:</span>
-                    <div className="relative">
+                <div className="flex items-center gap-2">
+                    <span className="text-xs sm:text-sm text-c-muted font-semibold tracking-wide">Platform:</span>
+                    <div className="relative flex-1 sm:flex-none">
                         <select
                             value={platformFilter}
                             onChange={(e) => setPlatformFilter(e.target.value)}
-                            className="appearance-none rounded-full border-white/40 bg-white/70 backdrop-blur-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:ring-2 outline-none sm:text-sm pl-4 pr-10 py-2 text-base-content font-medium transition cursor-pointer hover:bg-white"
+                            className="w-full appearance-none rounded-full border border-c-border bg-c-card shadow-sm outline-none text-sm pl-4 pr-8 py-1.5 text-c-text font-medium transition cursor-pointer hover:border-c-accent"
                         >
-                            <option value="All">All Categories</option>
+                            <option value="All">All</option>
                             <option value="Instagram">Instagram</option>
                             <option value="LinkedIn">LinkedIn</option>
                             <option value="X">X (Twitter)</option>
                             <option value="Facebook">Facebook</option>
                             <option value="General">General</option>
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-base-content/50">
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-c-muted">
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* ── Templates Section ── */}
+            {/* Templates Section */}
             <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-extrabold text-base-content flex items-center gap-2">
-                        <LayoutTemplate className="w-5 h-5 text-primary" />
+                <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-base sm:text-xl font-extrabold text-c-text flex items-center gap-2">
+                        <LayoutTemplate className="w-4 h-4 sm:w-5 sm:h-5 text-c-accent" />
                         Templates
                     </h2>
                     <button
                         onClick={() => setShowTemplateModal(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-primary text-primary-content hover:opacity-90 transition-all hover:-translate-y-0.5 shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold bg-c-accent text-white hover:opacity-90 transition-all hover:-translate-y-[1px] shadow-sm"
                     >
-                        <Plus className="w-4 h-4" />
-                        Create Template
+                        <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Create Template</span>
+                        <span className="sm:hidden">New</span>
                     </button>
                 </div>
 
                 {templates.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-14 rounded-3xl border-2 border-dashed border-base-300 bg-base-200 text-center gap-4">
-                        <MascotOrb className="w-20 h-20" expression="think" />
+                    <div className="flex flex-col items-center justify-center py-10 sm:py-14 rounded-2xl border border-dashed border-c-border bg-c-bg text-center gap-3 sm:gap-4">
+                        <MascotOrb className="w-16 h-16 sm:w-20 sm:h-20" expression="think" />
                         <div>
-                            <p className="font-bold text-base-content text-lg">No templates yet</p>
-                            <p className="text-base-content/60 text-sm mt-1">Save your best captions as reusable templates.</p>
+                            <p className="font-bold text-c-text text-base sm:text-lg">No templates yet</p>
+                            <p className="text-c-muted text-xs sm:text-sm mt-1">Save your best captions as reusable templates.</p>
                         </div>
                         <button
                             onClick={() => setShowTemplateModal(true)}
-                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold bg-primary text-primary-content hover:opacity-90 transition-all hover:-translate-y-0.5 shadow-md"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold bg-c-accent text-white hover:opacity-90 transition-all shadow-md"
                         >
                             <Plus className="w-4 h-4" /> Create your first template
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                         {templates.map(template => (
-                            <div key={template.id} className="post-card bg-base-100 rounded-2xl border border-base-300/60 p-5 flex flex-col justify-between gap-4 group">
+                            <div key={template.id} className="post-card bg-c-card rounded-2xl border border-c-border p-4 sm:p-5 flex flex-col justify-between gap-3 group">
                                 <div>
                                     <div className="flex items-start justify-between gap-2 mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <div className="p-1.5 rounded-lg bg-c-accent/10 text-c-accent flex-shrink-0">
                                                 <FileText className="w-4 h-4" />
                                             </div>
-                                            <h3 className="font-bold text-base-content text-sm leading-tight line-clamp-1">{template.title}</h3>
+                                            <h3 className="font-bold text-c-text text-sm leading-tight line-clamp-1">{template.title}</h3>
                                         </div>
                                         <button
                                             onClick={() => deleteTemplateMutation.mutate(template.id)}
-                                            className="text-base-content/30 hover:text-error transition-colors opacity-0 group-hover:opacity-100"
+                                            className="text-c-muted hover:text-red-500 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 p-1 -m-1"
                                             title="Delete template"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
-                                    <p className="text-xs text-base-content/60 line-clamp-3 leading-relaxed">{template.content}</p>
+                                    <p className="text-xs text-c-muted line-clamp-3 leading-relaxed">{template.content}</p>
                                 </div>
                                 <button
-                                    onClick={() => {
-                                        setPostToEdit(null);
-                                        setPrefillContent(template.content);
-                                        setIsFormOpen(true);
-                                    }}
-                                    className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary hover:text-primary-content transition-all"
+                                    onClick={() => { setPostToEdit(null); setPrefillContent(template.content); setIsFormOpen(true); }}
+                                    className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-c-bg border border-c-border text-c-text hover:border-c-accent hover:text-c-accent transition-all min-h-[36px]"
                                 >
                                     <BookOpen className="w-3.5 h-3.5" />
                                     Use Template
@@ -266,47 +255,49 @@ const Dashboard = () => {
                 )}
             </div>
 
-            {/* ── Create Template Modal ── */}
+            {/* Create Template Modal */}
             {showTemplateModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowTemplateModal(false)}>
-                    <div className="w-full max-w-md bg-base-100 rounded-3xl shadow-2xl border border-base-300 overflow-hidden" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-base-300">
-                            <h3 className="text-lg font-extrabold text-base-content flex items-center gap-2">
-                                <LayoutTemplate className="w-5 h-5 text-primary" />
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowTemplateModal(false)}>
+                    <div className="w-full max-w-md bg-c-card sm:rounded-3xl rounded-t-3xl shadow-2xl border border-c-border overflow-hidden max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-c-border flex-shrink-0">
+                            <h3 className="text-base sm:text-lg font-extrabold text-c-text flex items-center gap-2">
+                                <LayoutTemplate className="w-5 h-5 text-c-accent" />
                                 New Template
                             </h3>
                             <button onClick={() => setShowTemplateModal(false)} className="btn btn-ghost btn-sm btn-circle">
                                 <XIcon className="w-4 h-4" />
                             </button>
                         </div>
-                        <div className="p-6 space-y-4">
+                        <div className="p-5 space-y-4 overflow-y-auto">
                             <div>
-                                <label className="block text-sm font-semibold text-base-content mb-1.5">Title</label>
+                                <label className="block text-sm font-semibold text-c-text mb-1.5">Title</label>
                                 <input
                                     type="text"
                                     placeholder="e.g. Monday motivation post"
                                     value={newTemplate.title}
                                     onChange={e => setNewTemplate(t => ({ ...t, title: e.target.value }))}
-                                    className="input input-bordered w-full rounded-xl text-base-content"
+                                    className="input input-bordered w-full rounded-xl text-c-text text-base"
+                                    style={{ fontSize: '16px' }}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-base-content mb-1.5">Content</label>
+                                <label className="block text-sm font-semibold text-c-text mb-1.5">Content</label>
                                 <textarea
                                     rows={5}
                                     placeholder="Write your template caption here..."
                                     value={newTemplate.content}
                                     onChange={e => setNewTemplate(t => ({ ...t, content: e.target.value }))}
-                                    className="textarea textarea-bordered w-full rounded-xl text-base-content resize-none"
+                                    className="textarea textarea-bordered w-full rounded-xl text-c-text resize-none text-base"
+                                    style={{ fontSize: '16px' }}
                                 />
                             </div>
                         </div>
-                        <div className="px-6 pb-6 flex justify-end gap-3">
+                        <div className="px-5 pb-5 flex justify-end gap-3 flex-shrink-0">
                             <button onClick={() => setShowTemplateModal(false)} className="btn btn-ghost rounded-xl">Cancel</button>
                             <button
                                 disabled={!newTemplate.title.trim() || !newTemplate.content.trim() || createTemplateMutation.isPending}
                                 onClick={() => createTemplateMutation.mutate(newTemplate)}
-                                className="btn btn-primary rounded-xl"
+                                className="btn bg-c-accent hover:opacity-90 text-white rounded-xl border-none"
                             >
                                 {createTemplateMutation.isPending ? 'Saving...' : 'Save Template'}
                             </button>
@@ -315,38 +306,39 @@ const Dashboard = () => {
                 </div>
             )}
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Post Cards Grid */}
+            <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredPosts.map((post) => {
                     const pastDue = isPastDue(post);
                     return (
-                        <div key={post.id} className="post-card bg-base-100 rounded-2xl shadow-sm border border-base-300/60 overflow-hidden hover:border-indigo-200 transition-colors">
-                            <div className="p-5">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex flex-wrap gap-2">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.status === 'posted' ? 'bg-green-100 text-green-800' : pastDue ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-800'
+                        <div key={post.id} className="post-card bg-c-card rounded-2xl shadow-sm border border-c-border overflow-hidden hover:border-c-accent transition-colors">
+                            <div className="p-4 sm:p-5">
+                                <div className="flex justify-between items-start gap-2">
+                                    <div className="flex flex-wrap gap-1.5">
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.status === 'posted'
+                                            ? 'bg-green-100 text-green-800'
+                                            : pastDue
+                                                ? 'bg-red-100 text-red-700'
+                                                : 'bg-c-bg text-c-text border border-c-border'
                                             }`}>
                                             {post.status === 'posted' ? 'POSTED' : pastDue ? 'OVERDUE' : 'SCHEDULED'}
                                         </span>
                                         {post.platform && post.platform !== 'General' && (
-                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-base-200 text-base-content shadow-sm border border-base-300">
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-c-bg text-c-text shadow-sm border border-c-border">
                                                 {PLATFORM_ICONS[post.platform] || PLATFORM_ICONS['General']}
                                                 {post.platform}
                                             </span>
                                         )}
                                     </div>
-                                    <div className="flex space-x-2">
-                                        {/* Edit button — disabled when past due */}
+                                    <div className="flex gap-2 flex-shrink-0">
                                         {pastDue ? (
-                                            <span
-                                                title="Cannot edit: scheduled time has already passed"
-                                                className="text-base-content/20 cursor-not-allowed"
-                                            >
+                                            <span title="Cannot edit: scheduled time has passed" className="text-c-muted/50 cursor-not-allowed p-1">
                                                 <LockKeyhole className="w-4 h-4" />
                                             </span>
                                         ) : (
                                             <button
                                                 onClick={() => { setPostToEdit(post); setIsFormOpen(true); }}
-                                                className="text-base-content/40 hover:text-emerald-600 transition"
+                                                className="text-c-muted hover:text-c-accent transition p-1 min-w-[32px] min-h-[32px] flex items-center justify-center"
                                                 title="Edit post"
                                             >
                                                 <Pencil className="w-4 h-4" />
@@ -354,26 +346,24 @@ const Dashboard = () => {
                                         )}
                                         <button
                                             onClick={() => handleDelete(post.id)}
-                                            className="text-base-content/40 hover:text-red-600 transition"
+                                            className="text-c-muted hover:text-red-500 transition p-1 min-w-[32px] min-h-[32px] flex items-center justify-center"
                                             title="Delete post"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
                                 </div>
-                                <p className="mt-4 text-sm text-base-content whitespace-pre-wrap line-clamp-4">{post.content}</p>
-                                <div className={`mt-4 text-xs flex items-center gap-1 ${pastDue && post.status !== 'posted' ? 'text-red-500' : 'text-base-content/60'}`}>
-                                    {pastDue && post.status !== 'posted' && (
-                                        <span className="mr-0.5">⚠️</span>
-                                    )}
+                                <p className="mt-3 text-sm text-c-text whitespace-pre-wrap line-clamp-4">{post.content}</p>
+                                <div className={`mt-3 text-xs flex items-center gap-1 ${pastDue && post.status !== 'posted' ? 'text-red-500' : 'text-c-muted'}`}>
+                                    {pastDue && post.status !== 'posted' && <span className="mr-0.5">⚠️</span>}
                                     {format(new Date(post.scheduled_time), "MMM d, yyyy 'at' h:mm a")}
                                 </div>
                             </div>
                             {post.status === 'scheduled' && (
-                                <div className="bg-base-200 px-5 py-3 border-t border-base-200">
+                                <div className="bg-c-bg px-4 sm:px-5 py-3 border-t border-c-border">
                                     <button
-                                        onClick={() => markPosted(post.id)}
-                                        className="w-full inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-emerald-700 bg-emerald-100 hover:bg-emerald-200 transition"
+                                        onClick={() => markPostedMutation.mutate(post.id)}
+                                        className="w-full inline-flex justify-center items-center px-3 py-2 text-xs font-medium rounded-lg text-white bg-c-accent hover:opacity-90 transition min-h-[36px]"
                                     >
                                         <CheckCircle className="w-4 h-4 mr-1.5" />
                                         Mark as Posted
@@ -384,7 +374,7 @@ const Dashboard = () => {
                     );
                 })}
                 {filteredPosts.length === 0 && (
-                    <div className="col-span-full py-12 text-center text-base-content/60">
+                    <div className="col-span-full py-12 text-center text-c-muted text-sm">
                         No posts found.
                     </div>
                 )}

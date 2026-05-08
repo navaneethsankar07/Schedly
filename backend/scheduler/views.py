@@ -9,8 +9,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
 from django.contrib.auth.models import User
-from .models import Post, Profile, Notification, Template
-from .serializers import RegisterSerializer, PostSerializer, UserSerializer, NotificationSerializer, TemplateSerializer
+from .models import Post, Profile, Notification, Template, Goal
+from .serializers import RegisterSerializer, PostSerializer, UserSerializer, NotificationSerializer, TemplateSerializer, GoalSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -37,6 +37,16 @@ class PostViewSet(viewsets.ModelViewSet):
         post.status = 'posted'
         post.save()
         return Response({'status': 'marked as posted'})
+
+    @action(detail=True, methods=['patch'], url_path='update-stage')
+    def update_stage(self, request, pk=None):
+        post = self.get_object()
+        stage = request.data.get('workflow_stage')
+        if stage not in ['ideas', 'drafting', 'ready', 'scheduled', 'posted']:
+            return Response({'error': 'Invalid stage'}, status=status.HTTP_400_BAD_REQUEST)
+        post.workflow_stage = stage
+        post.save(update_fields=['workflow_stage'])
+        return Response({'workflow_stage': post.workflow_stage})
 
 class GoogleLoginView(APIView):
     permission_classes = (AllowAny,)
@@ -170,6 +180,23 @@ class ImproveCaptionView(APIView):
         if not content:
             return Response({'improved_content': ''})
 
+        # Feature: Use free AI (Pollinations) to improve caption
+        try:
+            import requests
+            import urllib.parse
+            prompt = f"Improve this social media caption explicitly by keeping the tone engaging and adding relevant emojis and hashtags. Do not output anything other than the final improved caption (no commentary, no conversational text). The original caption is: {content}"
+            encoded_prompt = urllib.parse.quote(prompt)
+            url = f"https://text.pollinations.ai/prompt/{encoded_prompt}"
+            
+            response = requests.get(url, timeout=15)
+            if response.status_code == 200:
+                improved_content = response.text.strip()
+                if improved_content and len(improved_content) > 5 and "Here are" not in improved_content:
+                    return Response({'improved_content': improved_content})
+        except Exception as e:
+            print("Failed to use AI fallback to manual:", e)
+
+        # Fallback heuristic
         emoji_map = {
             'excited': '🤩', 'happy': '😊', 'sad': '😢', 'love': '❤️', 'tech': '💻', 
             'coding': '👨‍💻', 'new': '✨', 'update': '🚀', 'design': '🎨', 'coffee': '☕',
@@ -230,3 +257,113 @@ class TimeSuggestionView(APIView):
             "18:00",
             "21:00"
         ])
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if not user.has_usable_password():
+            return Response({'error': 'Password change not available for Google-authenticated users'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+        
+        if not old_password or not new_password:
+            return Response({'error': 'old_password and new_password are required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if not user.check_password(old_password):
+            return Response({'error': 'Incorrect old password'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if len(new_password) < 8:
+            return Response({'error': 'New password must be at least 8 characters long'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        user.set_password(new_password)
+        user.save()
+        return Response({'message': 'Password changed successfully'})
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        request.user.delete()
+        return Response({'message': 'Account deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+class GoalViewSet(viewsets.ModelViewSet):
+    serializer_class = GoalSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Goal.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class WeeklyReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from django.utils import timezone
+        from datetime import timedelta, timedelta
+        from collections import Counter
+
+        now = timezone.now()
+        week_start = now - timedelta(days=7)
+        posts = request.user.posts.all()
+        week_posts = posts.filter(created_at__gte=week_start)
+        posted_posts = posts.filter(status='posted', updated_at__gte=week_start)
+
+        # Top platform
+        platforms = list(week_posts.values_list('platform', flat=True))
+        top_platform = Counter(platforms).most_common(1)[0][0] if platforms else 'None'
+
+        # Most active day
+        days = [p.created_at.strftime('%A') for p in week_posts]
+        most_active_day = Counter(days).most_common(1)[0][0] if days else 'None'
+
+        # Streak
+        streak = 0
+        check_date = now.date()
+        while True:
+            if posts.filter(status='posted', updated_at__date=check_date).exists():
+                streak += 1
+                check_date -= timedelta(days=1)
+            else:
+                break
+
+        # Daily breakdown for chart (last 7 days)
+        daily_breakdown = []
+        for i in range(6, -1, -1):
+            day = now - timedelta(days=i)
+            day_label = day.strftime('%a')
+            count = week_posts.filter(created_at__date=day.date()).count()
+            daily_breakdown.append({'day': day_label, 'posts': count})
+
+        # Insights
+        posted_count = posted_posts.count()
+        total_count = week_posts.count()
+        insights = []
+        if posted_count > 0:
+            insights.append(f"You posted {posted_count} time{'s' if posted_count != 1 else ''} this week 🎉")
+        if top_platform != 'None' and platforms:
+            insights.append(f"{top_platform} was your most active platform 📱")
+        if streak > 1:
+            insights.append(f"You're on a {streak}-day posting streak 🔥")
+        if most_active_day != 'None' and days:
+            insights.append(f"{most_active_day} is your most productive day 📅")
+        if not insights:
+            insights.append("Start posting to generate your first insights! 🚀")
+
+        # Productivity score (0-100)
+        score = min(100, round((posted_count / 7) * 100))
+
+        return Response({
+            'total_posts': total_count,
+            'posted_count': posted_count,
+            'top_platform': top_platform,
+            'most_active_day': most_active_day,
+            'streak': streak,
+            'productivity_score': score,
+            'daily_breakdown': daily_breakdown,
+            'insights': insights,
+        })
