@@ -36,7 +36,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'core.urls'
-CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "https://schedly-lime.vercel.app/"
 ]
