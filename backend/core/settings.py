@@ -1,13 +1,20 @@
-import os
+# Move load_dotenv to the top
+from dotenv import load_dotenv
 from pathlib import Path
-from datetime import timedelta
+import os
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env_path = BASE_DIR / '.env'
+if env_path.exists():
+    load_dotenv(env_path)
+
+from datetime import timedelta
+
 SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = False
-ALLOWED_HOSTS = ['https://schedly-urut.onrender.com']
+ALLOWED_HOSTS = ['schedly-urut.onrender.com', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,7 +44,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'core.urls'
 CORS_ALLOWED_ORIGINS = [
-    "https://schedly-lime.vercel.app/"
+    "https://schedly-lime.vercel.app"
 ]
 TEMPLATES = [
     {
@@ -115,11 +122,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
-from dotenv import load_dotenv
-
-env_path = BASE_DIR / '.env'
-if env_path.exists():
-    load_dotenv(env_path)
+# load_dotenv was moved to top
 
 GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID', 'placeholder')
 
