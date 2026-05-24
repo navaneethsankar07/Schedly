@@ -11,12 +11,12 @@ const SchedlyLogo = ({ size = 'md', className = '' }) => {
         <span
             className={`
                 group inline-block font-extrabold tracking-tight select-none
-                transition-all duration-300 hover:opacity-80 cursor-pointer
+                transition-all duration-300 hover:scale-[1.02] cursor-pointer
                 ${sizes[size] || sizes.md} ${className}
             `}
         >
-            <span className="text-c-text">Sched</span>
-            <span className="text-c-accent">ly</span>
+            <span className="text-current">Sched</span>
+            <span className="text-emerald-500">ly</span>
         </span>
     );
 };

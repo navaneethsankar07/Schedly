@@ -23,45 +23,45 @@ const LandingPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col font-sans transition-colors duration-300 relative bg-[#09090b] overflow-hidden text-neutral-100">
-            {/* Ambient Animated Particles Background for Landing Room */}
+        <div className="min-h-screen flex flex-col font-sans transition-colors duration-300 relative bg-[#09090b] overflow-x-hidden text-neutral-100">
+            {/* Ambient Animated Particles Background */}
             <div className="absolute inset-0 z-0">
-                <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse"></div>
-                <div className="absolute top-[40%] right-[5%] w-[400px] h-[400px] bg-cyan-600/20 rounded-full blur-[100px] mix-blend-screen float-slow"></div>
-                <div className="absolute bottom-[-10%] left-[30%] w-[600px] h-[600px] bg-teal-600/20 rounded-full blur-[120px] mix-blend-screen float-delayed"></div>
+                <div className="absolute top-[10%] left-[-10%] sm:left-[10%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-emerald-600/20 rounded-full blur-[80px] sm:blur-[120px] mix-blend-screen animate-pulse"></div>
+                <div className="absolute top-[30%] right-[-5%] w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-cyan-600/20 rounded-full blur-[70px] sm:blur-[100px] mix-blend-screen float-slow"></div>
+                <div className="absolute bottom-[-5%] left-[20%] w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-teal-600/20 rounded-full blur-[100px] sm:blur-[120px] mix-blend-screen float-delayed"></div>
 
-                {/* Floating SVGs */}
-                <Sparkles className="absolute top-1/4 left-1/4 text-white/10 w-12 h-12 floating-orb" />
-                <Calendar className="absolute top-1/3 right-1/4 text-white/10 w-16 h-16 float-slow" />
-                <Share2 className="absolute bottom-1/3 left-1/3 text-white/10 w-20 h-20 float-delayed" />
+                {/* Floating Icons */}
+                <Sparkles className="absolute top-1/4 left-1/4 text-white/10 w-8 h-8 sm:w-12 sm:h-12 floating-orb hidden sm:block" />
+                <Calendar className="absolute top-1/3 right-1/4 text-white/10 w-12 h-12 sm:w-16 sm:h-16 float-slow hidden sm:block" />
+                <Share2 className="absolute bottom-1/3 left-1/3 text-white/10 w-16 h-16 sm:w-20 sm:h-20 float-delayed hidden sm:block" />
             </div>
 
             {/* Navigation */}
-            <nav className="backdrop-blur-md sticky top-0 z-50 border-b border-white/10 bg-black/20">
+            <nav className="backdrop-blur-md sticky top-0 z-50 border-b border-white/10 bg-black/40">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
+                    <div className="flex justify-between items-center h-20">
                         <div className="flex items-center">
-                            <SchedlyLogo size="md" className="text-white" />
+                            <SchedlyLogo size="md" className="text-white hover:scale-105 transition-transform" />
                         </div>
 
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-3 sm:space-x-4">
                             {user ? (
                                 <Link
                                     to="/dashboard"
-                                    className="btn border-0 text-white rounded-full px-6 shadow-xl shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-500 hover:scale-105 transition-all font-bold"
+                                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-bold transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 active:scale-95 text-sm sm:text-base"
                                 >
                                     Dashboard
                                 </Link>
                             ) : (
                                 <>
-                                    <Link to="/login" className="btn btn-ghost rounded-full text-white/80 hover:text-white">
+                                    <Link to="/login" className="text-white/80 hover:text-white font-semibold transition-colors text-sm sm:text-base px-2">
                                         Log in
                                     </Link>
                                     <Link
                                         to="/register"
-                                        className="btn border-0 text-white rounded-full px-6 shadow-xl shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-500 hover:scale-105 transition-all font-bold"
+                                        className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-bold transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 active:scale-95 text-sm sm:text-base"
                                     >
-                                        Get Started Free
+                                        Get Started
                                     </Link>
                                 </>
                             )}
@@ -72,140 +72,177 @@ const LandingPage = () => {
 
             {/* Hero Section */}
             <main className="flex-grow z-10 relative">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-32">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24 sm:pt-24 sm:pb-32">
+                    <div className="grid lg:grid-cols-2 gap-16 items-center">
                         <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, ease: "easeOut" }}
-                            className="max-w-2xl"
+                            className="text-center lg:text-left"
                         >
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-emerald-300 text-sm font-semibold mb-8 shadow-inner backdrop-blur-sm">
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-emerald-300 text-sm font-semibold mb-8 shadow-inner backdrop-blur-sm mx-auto lg:mx-0">
                                 <Sparkles className="w-4 h-4 text-emerald-400" />
-                                <span>Say hello to your intelligent assistant</span>
+                                <span>Say hello to Nova, your AI planner</span>
                             </div>
-                            <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-tight mb-6">
-                                Plan smarter.<br />
-                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 neon-text-glow">Post better.</span>
+                            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
+                                Your Content,<br className="hidden sm:block" />
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">Perfectly Timed.</span>
                             </h1>
-                            <p className="text-lg md:text-xl text-neutral-300 mb-10 leading-relaxed max-w-lg font-medium">
-                                Plan, organize, and track your content in one beautiful space. Let Nova handle your schedule while you build your audience.
+                            <p className="text-lg md:text-xl text-neutral-400 mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium">
+                                Schedly helps you plan, organize, and automate your social media presence. Beautifully simple, yet incredibly powerful.
                             </p>
 
-                            <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                                 <Link
                                     to={user ? "/dashboard" : "/register"}
-                                    className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-full text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] bg-emerald-600 hover:bg-emerald-500 hover:scale-[1.02] transition-all"
+                                    className="group inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-full text-white shadow-[0_0_25px_rgba(16,185,129,0.3)] bg-emerald-600 hover:bg-emerald-500 hover:scale-[1.05] transition-all"
                                 >
-                                    Start Scheduling
-                                    <ChevronRight className="w-5 h-5 ml-1" />
+                                    Start Free Today
+                                    <ChevronRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
                                 </Link>
                                 <a
                                     href="#features"
-                                    className="inline-flex items-center justify-center px-8 py-4 border border-white/20 text-base font-bold rounded-full text-white hover:bg-white/10 hover:scale-[1.02] transition-all backdrop-blur-sm"
+                                    className="inline-flex items-center justify-center px-8 py-4 border border-white/20 text-base font-bold rounded-full text-white hover:bg-white/10 hover:border-white/40 transition-all backdrop-blur-sm"
                                 >
-                                    Meet Nova
+                                    Explore Features
                                 </a>
                             </div>
                         </motion.div>
 
-                        {/* Right: Character Illustration */}
+                        {/* Right: Mascot Illustration */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
+                            initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 1, delay: 0.2 }}
-                            className="relative flex justify-center items-center h-[500px]"
+                            className="relative flex justify-center items-center h-[350px] sm:h-[500px]"
                         >
-                            {/* Floating elements behind mascot */}
-                            <div className="absolute top-[20%] left-[10%] w-16 h-16 bg-gradient-to-tr from-cyan-400 to-emerald-500 rounded-2xl rotate-12 floating-orb opacity-60 blur-[1px]"></div>
-                            <div className="absolute bottom-[20%] right-[10%] w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full float-delayed opacity-50 blur-[2px]"></div>
+                            {/* Decorative Blobs */}
+                            <div className="absolute top-[10%] left-[20%] w-24 h-24 bg-gradient-to-tr from-cyan-400 to-emerald-500 rounded-3xl rotate-12 floating-orb opacity-40 blur-[2px]"></div>
+                            <div className="absolute bottom-[10%] right-[20%] w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full float-delayed opacity-30 blur-[4px]"></div>
 
                             {/* Main Mascot */}
-                            <div className="relative z-10 floating-orb">
-                                <MascotOrb className="w-[300px] h-[300px]" expression="smile" />
+                            <div className="relative z-10 floating-orb drop-shadow-2xl">
+                                <MascotOrb className="w-[200px] sm:w-[350px] h-[200px] sm:h-[350px]" expression="smile" />
                             </div>
 
-                            {/* Glass Card Floating Notification */}
+                            {/* Floating Glass UI Element */}
                             <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 1.5, duration: 0.5 }}
-                                className="absolute bottom-1/4 -left-10 bg-white/10 backdrop-blur-xl border border-white/20 p-4 rounded-2xl shadow-2xl glass-card flex items-center gap-3"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1, duration: 0.5 }}
+                                className="absolute bottom-4 sm:bottom-10 -right-4 sm:-right-8 bg-black/40 backdrop-blur-2xl border border-white/10 p-5 rounded-2xl shadow-2xl flex items-center gap-4 max-w-[240px]"
                             >
-                                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">✓</div>
+                                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                                    <CheckCircle className="w-6 h-6" />
+                                </div>
                                 <div>
-                                    <p className="text-sm font-bold text-white">Post Scheduled!</p>
-                                    <p className="text-xs text-white/60">Going live at 12:00 PM</p>
+                                    <p className="text-sm font-bold text-white">Post Optimized!</p>
+                                    <p className="text-xs text-white/50">Engagement score: 98%</p>
                                 </div>
                             </motion.div>
                         </motion.div>
                     </div>
                 </div>
 
+                {/* Info Bar */}
+                <div className="border-y border-white/5 bg-white/[0.02] py-8 overflow-hidden">
+                    <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center gap-8 sm:gap-24 opacity-40 grayscale contrast-125">
+                        <div className="flex items-center gap-2 font-black text-2xl italic tracking-tighter">INSTAGRAM</div>
+                        <div className="flex items-center gap-2 font-black text-2xl italic tracking-tighter">TIKTOK</div>
+                        <div className="flex items-center gap-2 font-black text-2xl italic tracking-tighter">TWITTER</div>
+                        <div className="flex items-center gap-2 font-black text-2xl italic tracking-tighter">LINKEDIN</div>
+                    </div>
+                </div>
+
                 {/* Features Section */}
-                <div id="features" className="bg-black/40 py-24 border-t border-white/5 backdrop-blur-sm">
+                <section id="features" className="py-32 relative">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="text-center mb-16"
+                            className="text-center mb-20"
                         >
-                            <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4">Everything you need to succeed</h2>
-                            <p className="text-neutral-400 max-w-2xl mx-auto text-lg font-medium">We've stripped away the complexity to give you exactly what matters.</p>
+                            <h2 className="text-4xl md:text-5xl font-black text-white mb-6 uppercase tracking-tight">Supercharge your workflow</h2>
+                            <p className="text-neutral-400 max-w-2xl mx-auto text-lg font-medium">All the tools you need to grow your social presence without the burnout.</p>
                         </motion.div>
 
                         <motion.div
                             variants={containerVariants}
                             initial="hidden"
                             whileInView="show"
-                            viewport={{ once: true, margin: "-50px" }}
-                            className="grid md:grid-cols-3 gap-8"
+                            viewport={{ once: true, margin: "-100px" }}
+                            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
                         >
                             {[
                                 {
-                                    icon: <LayoutDashboard className="w-7 h-7 text-cyan-400" />,
-                                    color: "from-cyan-500/20 to-blue-500/10 border-cyan-500/20",
-                                    title: "Smart Dashboard",
-                                    desc: "Create and track all your scheduled posts in one intuitive interface. Filter between upcoming and completed posts effortlessly.",
+                                    icon: <LayoutDashboard className="w-8 h-8 text-cyan-400" />,
+                                    color: "from-cyan-500/10 to-transparent border-cyan-500/20",
+                                    title: "Kanban Planning",
+                                    desc: "Organize your ideas into states: Icebox, In Progress, Scheduled, and Published. Never lose a thought again.",
                                 },
                                 {
-                                    icon: <Calendar className="w-7 h-7 text-emerald-400" />,
-                                    color: "from-emerald-500/20 to-teal-500/10 border-emerald-500/20",
-                                    title: "Visual Calendar",
-                                    desc: "Get a bird's-eye view of your entire month. Spot content gaps and maintain consistency with our drag-and-drop calendar.",
+                                    icon: <Calendar className="w-8 h-8 text-emerald-400" />,
+                                    color: "from-emerald-500/10 to-transparent border-emerald-500/20",
+                                    title: "Interactive Calendar",
+                                    desc: "Visualize your content strategy with our drag-and-drop calendar. Easily spot gaps in your posting schedule.",
                                 },
                                 {
-                                    icon: <CheckCircle className="w-7 h-7 text-teal-400" />,
-                                    color: "from-teal-500/20 to-cyan-500/10 border-teal-500/20",
-                                    title: "AI Caption Assist",
-                                    desc: "Let Nova's smart caption engine enhance your copy — auto-add hashtags, emojis, and formatting for each platform.",
+                                    icon: <Sparkles className="w-8 h-8 text-teal-400" />,
+                                    color: "from-teal-500/10 to-transparent border-teal-500/20",
+                                    title: "Nova AI Assistant",
+                                    desc: "Let AI generate captions, suggest hashtags, and find the perfect time to post when your audience is most active.",
                                 }
                             ].map((ft, i) => (
                                 <motion.div
                                     variants={itemVariants}
                                     key={i}
-                                    className={`bg-gradient-to-br ${ft.color} backdrop-blur-sm p-8 rounded-3xl border hover:scale-[1.02] hover:shadow-2xl hover:shadow-indigo-900/30 transition-all duration-300`}
+                                    className={`bg-gradient-to-br ${ft.color} backdrop-blur-sm p-10 rounded-[2.5rem] border border-white/5 hover:border-white/20 transition-all duration-500 group`}
                                 >
-                                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-white/10 backdrop-blur-sm border border-white/10">
+                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-8 bg-white/5 border border-white/10 group-hover:scale-110 group-hover:bg-white/10 transition-all duration-300">
                                         {ft.icon}
                                     </div>
-                                    <h3 className="text-xl font-extrabold text-white mb-3 tracking-tight">{ft.title}</h3>
+                                    <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">{ft.title}</h3>
                                     <p className="text-neutral-400 leading-relaxed font-medium">{ft.desc}</p>
                                 </motion.div>
                             ))}
                         </motion.div>
                     </div>
-                </div>
+                </section>
+
+                {/* CTA Section */}
+                <section className="py-24 px-4">
+                    <div className="max-w-5xl mx-auto bg-gradient-to-r from-emerald-600 to-teal-600 rounded-[3rem] p-12 sm:p-20 text-center relative overflow-hidden shadow-2xl shadow-emerald-900/40">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 animate-pulse"></div>
+                        <div className="relative z-10">
+                            <h2 className="text-4xl sm:text-6xl font-black text-white mb-8 tracking-tighter uppercase line-clamp-2">Ready to level up?</h2>
+                            <p className="text-emerald-100 text-xl mb-12 max-w-2xl mx-auto font-medium opacity-90">Join thousands of creators who use Schedly to stay organized and consistent.</p>
+                            <Link
+                                to="/register"
+                                className="inline-flex items-center justify-center px-10 py-5 bg-white text-emerald-700 text-lg font-black rounded-full hover:bg-emerald-50 hover:scale-105 transition-all shadow-xl active:scale-95"
+                            >
+                                Get Started For Free
+                            </Link>
+                        </div>
+                    </div>
+                </section>
             </main>
 
             {/* Footer */}
-            <footer className="border-t border-white/10 py-12 z-10 relative">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <div className="flex justify-center items-center mb-4">
-                        <SchedlyLogo size="lg" className="text-white" />
+            <footer className="border-t border-white/5 py-16 z-10 relative bg-black/40">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                        <div>
+                            <SchedlyLogo size="lg" className="text-white mb-4 block mx-auto md:mx-0" />
+                            <p className="text-neutral-500 text-sm font-medium">Elevating social media workflows since 2026.</p>
+                        </div>
+                        <div className="flex gap-8 text-sm font-bold text-neutral-400">
+                            <a href="#" className="hover:text-emerald-400 transition-colors">Twitter</a>
+                            <a href="#" className="hover:text-emerald-400 transition-colors">Discord</a>
+                            <a href="#" className="hover:text-emerald-400 transition-colors">Changelog</a>
+                        </div>
+                        <p className="text-neutral-600 text-sm">© 2026 Schedly Inc.</p>
                     </div>
-                    <p className="text-neutral-500 text-sm font-medium">© 2026 Social Media Scheduler — Built for creators, by creators.</p>
                 </div>
             </footer>
         </div>
