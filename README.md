@@ -1,6 +1,6 @@
 # 🗓️ Schedly
 
-**Schedly** is a modern, full-stack social media content scheduling and productivity platform built for creators, developers, and teams who want to plan, optimize, and manage their content workflow efficiently.
+**Schedly** is a modern, full-stack social media content scheduling platform built for creators, developers, and teams who want to plan, optimize, and manage their content workflow efficiently.
 
 It goes beyond basic scheduling by combining **automation, AI assistance, workflow management, and analytics** into a unified experience.
 
